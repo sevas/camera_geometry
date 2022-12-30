@@ -6,7 +6,7 @@ import pytest
 from cg.math3d import rot_z, rot_y
 from cg.project_points import project_points_np, project_points_nb, project_points_cv
 
-# from cg_rustpy import project_points as project_points_rs
+from cg_rustpy import project_points_rs
 
 
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -60,7 +60,7 @@ def camera_params():
 
 
 @pytest.mark.parametrize(
-    "project_func", [project_points_np, project_points_cv, project_points_nb]
+    "project_func", [project_points_np, project_points_cv, project_points_nb, project_points_rs]
 )
 def test_benchmarkproject_points(benchmark, project_func, bunny_pcl, camera_params):
     k, dist = camera_params
@@ -72,6 +72,8 @@ def test_equivalence(bunny_pcl, camera_params):
     uv_np = project_points_np(bunny_pcl, k, dist)
     uv_cv = project_points_cv(bunny_pcl, k, dist)
     uv_nb = project_points_nb(bunny_pcl, k, dist)
+    uv_rs = project_points_rs(bunny_pcl, k, dist)
 
     np.testing.assert_almost_equal(uv_np, uv_cv)
     np.testing.assert_almost_equal(uv_nb, uv_cv)
+    np.testing.assert_almost_equal(uv_rs, uv_cv)
