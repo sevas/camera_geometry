@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.1
+#       jupytext_version: 1.14.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -15,12 +15,21 @@
 
 # %%
 import sys
-
+import importlib
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 import plyfile
 import cupy as cp
+
+# %%
+from cg import project_points as cgp
+importlib.reload(cgp)
+
+# %%
+from cg.math3d import rot_x, rot_y, rot_z
+from cg.camera_parameters import fov2focal, focal2fov
+from cg.render import make_img_zbuf, make_img
 
 # %%
 import os
@@ -36,13 +45,6 @@ def load_ply(fpath: str) -> plyfile.PlyData:
 
 
 bunny_ply = load_ply(bunny)
-
-# %%
-from cg.math3d import rot_x, rot_y, rot_z
-from cg.camera_parameters import fov2focal, focal2fov
-
-
-
 
 # %%
 from numba import njit
@@ -173,58 +175,6 @@ K = np.array([
 dist_coeffs = np.array([k1, k2, p1, p2, k3])
 tvec = np.array([0.0, 0.0, 0.0])
 rvec = np.eye(3)
-
-
-# %%
-def project_points(points, k, dist_coeffs):
-    uvw = k @ points.reshape(-1, 3).T
-    u = uvw[0,:] / uvw[2,:]
-    v = uvw[1,:] / uvw[2,:]
-
-    return u, v
-
-
-def project_points_dist(points, k, dist_coeffs):
-    XYZ = points.reshape(-1, 3).T
-    x = XYZ[0,:] / XYZ[2,:]
-    y = XYZ[1,:] / XYZ[2,:]
-
-    r2 = x*x + y*y
-    r4 = r2*r2
-    r6 = r4*r2
-    a1 = 2*x*y
-    a2 = r2 + 2*x*x
-    a3 = r2 + 2*y*y
-    k1, k2, p1, p2, k3 = dist_coeffs
-
-    cdist = (1+k1*r2 + k2*r4 + k3*r6)
-    xd = x * cdist + p1*a1 + p2*a2
-    yd = y * cdist + p1*a3 + p2*a1
-
-    fx = k[0,0]
-    fy = k[1,1]
-    cx = k[0,2]
-    cy = k[1,2]
-    u =  xd * fx + cx
-    v =  yd * fy + cy
-
-    return u, v
-
-
-
-# %%
-
-
-class ProjectPoints:
-    def __init__(self, intrinsics, dist_coeff):
-        ...
-
-    def project(self, points):
-        ...
-
-
-# %%
-cp.show_config()
 
 # %%
 squared_diff = cp.ElementwiseKernel(
@@ -400,7 +350,7 @@ assert np.allclose(res_np, a_np + b_np)
 
 # print(f"hfov: {np.rad2deg(focal2fov(fx, w))}")
 # print(f"vfov: {np.rad2deg(focal2fov(fy, h))}")
-u, v = project_points(bunny_pcl_r, K, dist_coeffs)
+u, v = cgp.project_points_np_pinhole(bunny_pcl_r, K, dist_coeffs)
 
 
 
@@ -409,25 +359,20 @@ bunny_pcl_r_32 = bunny_pcl_r.astype(np.float32)
 
 # %% pycharm={"name": "#%%timeit\n"}
 # %%timeit
-ud, vd = project_points_dist(bunny_pcl_r_32, K, dist_coeffs)
+ud, vd = cgp.project_points_np(bunny_pcl_r_32, K, dist_coeffs)
 
 # %%
 #  %%timeit
 
-cv_projected, _ = cv2.projectPoints(bunny_pcl_r, cameraMatrix=K, distCoeffs=dist_coeffs, rvec=rvec, tvec=tvec)
+u_cv, v_cv = cgp.project_points_cv(bunny_pcl_r_32, K, dist_coeffs)
 
 # %%
-uv_cv = np.squeeze(cv_projected)
-u_cv = uv_cv[:, 0]
-v_cv = uv_cv[:, 1]
-
 print(len(u_cv))
 print(len(np.where((u_cv>=0) * (u_cv<h))[0]))
 print(len(np.where((v_cv>=0) * (v_cv<w))[0]))
 
 unn = np.round(u_cv).astype(int)
 vnn = np.round(v_cv).astype(int)
-
 
 inds_int = np.where((unn>=0) * (unn<w) * (vnn>=0) * (vnn<h))[0]
 
@@ -446,41 +391,6 @@ target[vnn[inds_int], unn[inds_int]]= bunny_pcl_r[inds_int, 2]
 
 plt.imshow(target)
 
-
-
-# %%
-
-from numba import njit
-
-
-def make_img(u, v, pcl):
-    im = np.ones(shape=(h, w)) * 2
-    uu = np.round(u).astype(int)
-    vv = np.round(v).astype(int)
-
-    inds = np.where((0<=uu) * (uu<w) * (0<=vv) * (vv<h))[0]
-    uc = uu[inds]
-    vc = vv[inds]
-
-    im[vc, uc] = pcl[inds, 2]
-    return im
-
-#@njit
-def make_img_zbuf(u, v, pcl):
-    im = np.ones(shape=(h, w)) * 2
-    uu = np.round(u).astype(int)
-    vv = np.round(v).astype(int)
-
-    inds = np.where((0<=uu) * (uu<w) * (0<=vv) * (vv<h))[0]
-
-    for i in range(len(inds)):
-        uc = uu[inds[i]]
-        vc = vv[inds[i]]
-        z = pcl[inds[i],2]
-        if im[vc, uc] >= z:
-            im[vc, uc] = z
-
-    return im
 
 
 # %%
@@ -531,12 +441,8 @@ plt.colorbar()
 
 # %%
 import timeit
-
 fpaths = [
-    "data/bunny_zipper.ply",
-    # "data/bunny_zipper_res2.ply",
-    # "data/bunny_zipper_res3.ply",
-    # "data/bunny_zipper_res4.ply",
+    "data/bun_zipper.ply",
 ]
 
 
@@ -565,27 +471,25 @@ results = {}
 # %%
 
 # numpy, pinhole only
-u_ph, v_ph = project_points(vertices, K, dist_coeffs)
+u_ph, v_ph = cgp.project_points_np_pinhole(vertices, K, dist_coeffs)
 loop_ph = 10000
-results_ph = timeit.timeit(lambda: project_points(vertices, K, dist_coeffs), number=loop_ph)
+results_ph = timeit.timeit(lambda: cgp.project_points_np_pinhole(vertices, K, dist_coeffs), number=loop_ph)
 results["numpy_pinhole"] = (u_ph, v_ph, results_ph/loop_ph)
 
 
 # %%
 # numpy, pinhole+brown radial
-u_br, v_br = project_points_dist(vertices, K, dist_coeffs)
+u_br, v_br = cgp.project_points_np(vertices, K, dist_coeffs)
 loop_br = 1000
-results_br = timeit.timeit(lambda: project_points_dist(vertices, K, dist_coeffs), number=loop_br)
+results_br = timeit.timeit(lambda: cgp.project_points_np(vertices, K, dist_coeffs), number=loop_br)
 results["numpy_brownradial"] = (u_br, v_br, results_br/loop_br)
 
 # %%
 # opencv, pinhole+brown radial
-cv_projected, _ = cv2.projectPoints(vertices, cameraMatrix=K, distCoeffs=dist_coeffs, rvec=rvec, tvec=tvec)
-uv_cv = np.squeeze(cv_projected)
-u_cv = uv_cv[:, 0]
-v_cv = uv_cv[:, 1]
+u_cv, v_cv = cgp.project_points_cv(vertices, K, dist_coeffs)
+
 loop_cv = 100
-results_cv = timeit.timeit(lambda: cv2.projectPoints(vertices, cameraMatrix=K, distCoeffs=dist_coeffs, rvec=rvec, tvec=tvec), number=loop_cv)
+results_cv = timeit.timeit(lambda: cgp.project_points_cv(vertices, K, dist_coeffs), number=loop_cv)
 results["cv_brownradial"] = (u_cv, v_cv, results_cv/loop_cv)
 
 
@@ -610,9 +514,9 @@ AABBCC
 .DDEE.
 """)
 
-im_ph = make_img_zbuf(results["numpy_pinhole"][0], results["numpy_pinhole"][1], vertices)
-im_br = make_img_zbuf(results["numpy_brownradial"][0], results["numpy_brownradial"][1], vertices)
-im_cv = make_img_zbuf(results["cv_brownradial"][0], results["cv_brownradial"][1], vertices)
+im_ph = make_img_zbuf((h, w), results["numpy_pinhole"][0], results["numpy_pinhole"][1], vertices)
+im_br = make_img_zbuf((h, w), results["numpy_brownradial"][0], results["numpy_brownradial"][1], vertices)
+im_cv = make_img_zbuf((h, w), results["cv_brownradial"][0], results["cv_brownradial"][1], vertices)
 
 ax['A'].imshow(im_ph, vmax=0.25, vmin=0.05)
 ax['B'].imshow(im_br, vmax=0.25, vmin=0.05)
@@ -621,44 +525,4 @@ ax['D'].imshow(im_ph-im_br, cmap="coolwarm")
 ax['D'].set_title(f"diff(np_pinhole, np_brownradial), mean={np.mean(im_ph-im_br)}")
 ax['E'].imshow(im_br-im_cv, cmap="coolwarm")
 ax['E'].set_title(f"diff(np_brownradial, cv_brownradial), mean={np.mean(im_br-im_cv)}")
-
-# %%
-
-# %%
-import matplotlib.pyplot as plt
-import numpy as np
-
-x = np.array([0, 1, 2, 3])
-y = np.array([-1, 0.2, 0.9, 2.1])
-
-A = np.vstack([x, np.ones(len(x))]).T
-print(A)
-m, c = np.linalg.lstsq(A, y, rcond=None)[0]
-
-_ = plt.plot(x, y, 'o', label='Original data', markersize=10)
-_ = plt.plot(x, m*x + c, 'r', label='Fitted line')
-_ = plt.legend()
-plt.show()
-
-
-# %%
-def project3d_to_2d(points, camera_matrix, distortion_coefficients):
-    # project 3d points to 2d points
-    # points: (N, 3)
-    # camera_matrix: (3, 3)
-    # distortion_coefficients: (1, 4)`
-    # return: (N, 2)
-    points = np.array(points)
-    camera_matrix = np.array(camera_matrix)
-    distortion_coefficients = np.array(distortion_coefficients)
-    assert points.shape[1] == 3
-    assert camera_matrix.shape == (3, 3)
-    assert distortion_coefficients.shape == (1, 4)
-    return np.linalg.lstsq(camera_matrix @ points.T, distortion_coefficients)[0].T
-
-
-
-project3d_to_2d(vertices , K, dist_coeffs[:4].reshape(1, 4))
-
-
 
