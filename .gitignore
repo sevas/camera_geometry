@@ -1,3 +1,7 @@
 *.pyc
 
 .idea/
+
+
+rust/target
+Cargo.lock
