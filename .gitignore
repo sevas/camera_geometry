@@ -1,7 +1,16 @@
+# python 
 *.pyc
+.pytest_cache
+.benchmarks
 
-.idea/
 
-
+# rust 
 rust/target
 Cargo.lock
+
+
+# IDEs etc
+.idea/
+.vscode/
+!.vscode/tasks.json
+!.vscode/launch.json
