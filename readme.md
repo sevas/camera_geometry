@@ -6,10 +6,12 @@ Including:
 
 - pure numpy
 - opencv
+- numba
+- julia
+- rust
 
 
 Coming next:
-- numba
 - opencl 
 - cuda
 - glsl shader
