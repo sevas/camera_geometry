@@ -1,0 +1,91 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo build (release)",
+            "command": "cargo",
+            "type": "shell",
+            "args": [
+                "build", "--release"
+            ],
+            "problemMatcher": [
+                {
+                  "owner": "rust",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\d+):(\\d+)\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "endLine": 4,
+                    "endColumn": 5,
+                    "severity": 6,
+                    "message": 7
+                  }
+                }
+            ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        },
+        {
+            "label": "cargo build (debug)",
+            "command": "cargo",
+            "type": "shell",
+            "args": [
+                "build"
+            ],
+            "problemMatcher": [
+                {
+                  "owner": "rust",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\d+):(\\d+)\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "endLine": 4,
+                    "endColumn": 5,
+                    "severity": 6,
+                    "message": 7
+                  }
+                }
+              ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        },
+        {
+            "label": "maturin develop",
+            "command": "maturin",
+            "type": "shell",
+            "args": [
+                "develop"
+            ],
+            "problemMatcher": [
+                {
+                  "owner": "rust",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\d+):(\\d+)\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "endLine": 4,
+                    "endColumn": 5,
+                    "severity": 6,
+                    "message": 7
+                  }
+                }
+              ],
+            "presentation": {
+                "reveal": "always"
+            },
+            "group": "build"
+        }
+    ]
+}
