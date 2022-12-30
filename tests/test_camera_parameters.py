@@ -3,7 +3,9 @@ import pytest
 from cg.camera_parameters import focal2fov, fov2focal
 
 
-@pytest.mark.parametrize("target_im_shape", [(480, 640), (1200, 1600)], ids=lambda x: f"{x[0]}x{x[1]}")
+@pytest.mark.parametrize(
+    "target_im_shape", [(480, 640), (1200, 1600)], ids=lambda x: f"{x[0]}x{x[1]}"
+)
 def test_roundtrip(target_im_shape):
     hfovs = np.arange(10, 170, 0.5)
     h, w = target_im_shape
