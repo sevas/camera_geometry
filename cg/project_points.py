@@ -34,15 +34,14 @@ def project_points_np(points, k, dist_coeffs):
     u = xd * fx + cx
     v = yd * fy + cy
 
-    return u, v
+    return np.stack([u, v], axis=1)
 
 
 @njit
 def project_points_nb(points, k, dist_coeffs):
     XYZ = points.reshape(-1, 3).T
     N = XYZ.shape[1]
-    u = np.empty(shape=N)
-    v = np.empty(shape=N)
+    uv = np.empty(shape=(N, 2))
 
     fx = k[0, 0]
     fy = k[1, 1]
@@ -65,10 +64,10 @@ def project_points_nb(points, k, dist_coeffs):
         xd = x * cdist + p1 * a1 + p2 * a2
         yd = y * cdist + p1 * a3 + p2 * a1
 
-        u[i] = xd * fx + cx
-        v[i] = yd * fy + cy
+        uv[i, 0] = xd * fx + cx
+        uv[i, 1] = yd * fy + cy
 
-    return u, v
+    return uv
 
 
 def project_points_cv(points, k, dist_coeffs):
@@ -80,6 +79,4 @@ def project_points_cv(points, k, dist_coeffs):
         points, cameraMatrix=k, distCoeffs=dist_coeffs, rvec=rvec, tvec=tvec
     )
     uv = np.squeeze(cv_projected)
-    u = uv[:, 0]
-    v = uv[:, 1]
-    return u, v
+    return uv

@@ -19,8 +19,9 @@ fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         dist: ArrayView1<'_, f64>,
     ) -> Array2<f64> {
         let n = points.shape()[0];
-        let uv_shape = (2, n);
+        let uv_shape = (n, 2);
         let mut uv: Array2<f64> = Array::zeros(uv_shape);
+
 
         let fx = k[(0, 0)];
         let fy = k[(1, 1)];
@@ -32,12 +33,7 @@ fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         let p2 = dist[3];
         let k3 = dist[4];
 
-        // let index = IxDyn(&[1, 0]);
-        // let element = array.get(index).unwrap();
-        // println!("The element at position {:?} is {}", index, element);
-
         for i in 0..n {
-            // let index = IxDyn(&[1, 0]);
             let p_x = points[(i, 0)];
             let p_y = points[(i, 1)];
             let p_z = points[(i, 2)];
@@ -65,7 +61,7 @@ fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
     // wrapper of `project_points`
     #[pyfn(m)]
-    #[pyo3(name = "project_points")]
+    #[pyo3(name = "project_points_rs")]
     fn project_points_py<'py>(
         py: Python<'py>,
         points: PyReadonlyArray2<'_, f64>,
