@@ -18,3 +18,5 @@ Cargo.lock
 cmake-build*/
 _build/
 .build/
+.vs/
+/**/out/build
