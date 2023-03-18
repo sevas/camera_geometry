@@ -9,38 +9,39 @@ endif()
 
 option(USE_CUDA "Use CUDA" ON)
 
-set(cpu_source_files 
-    "${CMAKE_SOURCE_DIR}/src/main.cc"
-    )
-
-set(gpu_source_files 
-    "${CMAKE_SOURCE_DIR}/src/gpu.cu"
-    "${CMAKE_SOURCE_DIR}/src/gpu.hpp"
-    "${CMAKE_SOURCE_DIR}/src/vector_add.cu"
-    "${CMAKE_SOURCE_DIR}/src/project_points.cu"
-)
-
-set(config_files
-    .editorconfig
-    .clang-format
-    .gitignore
-    .gitattributes
-)
-
-enable_language("CUDA")
-add_executable(cg_cpp ${cpu_source_files} ${gpu_source_files})
-target_compile_definitions(cg_cpp PRIVATE USE_CUDA)
+add_subdirectory(src)
 
 if(MSVC)
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${cpu_source_files} )
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${gpu_source_files} )
+ 
+    # make these files visible in visual studio solution explorer
+    set(config_files                     
+        #conanfile.txt
+        ../_clang-format
+        ../.gitignore
+        ../.editorconfig
+        #../.gitlab-ci.yml
+        #readme.txt
+    )
+    set(cmake_config_files               
+        #make/conan.cmake
+        #cmake/generic.vcxproj.user.in
+    )
 
-    set(CMAKE_CXX_FLAGS "/W3 /EHsc")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /WX")
+    set(script_files         
+        scripts/build_vs2019.ps1
+        scripts/build_vs2022.ps1
+        scripts/generate_vs_solution.ps1
+    )
 
-    #target_compile_options(cg_cpp PRIVATE $<$COMPILE_LANGUAGE:CXX>:$<$<CONFIG:Debug>:/W4 /ZI> $<$<CONFIG:Release>:/WX>>)
+    add_custom_target(config_files SOURCES ${config_files} ${cmake_config_files} ${script_files}) 
+    set_target_properties(config_files PROPERTIES LANGUAGE NONE)
     
+    source_group("config" FILES ${config_files})      
+    source_group("cmake" FILES ${cmake_config_files}) 
+    source_group("scripts" FILES ${script_files}) 
+
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 endif()
 
 

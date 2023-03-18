@@ -6,7 +6,7 @@
 #include <cuda_runtime.h>
 #pragma warning(pop)
 
-#include "gpu.hpp"
+#include "cuda/gpu.hpp"
 
 
 using std::begin;
@@ -158,7 +158,7 @@ struct vertex_data
 };
 
 
-vertex_data make_plane(int w, int h, int cx, int cy, int cz, int step = 1)
+vertex_data make_plane(int w, int h, float cx, float cy, float cz, int step = 1)
 {
     vertex_data out;
     for (size_t i = 0; i < w; i += step)

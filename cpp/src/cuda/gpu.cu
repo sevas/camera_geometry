@@ -1,9 +1,11 @@
 #include <iostream>
 #include "gpu.hpp"
 
+#include <cuda_runtime_api.h>
+
 void printCudaVersion()
 {
-    std::cout << "CUDA Compiled version: " << __CUDACC_VER__ << std::endl;
+    //std::cout << "CUDA Compiled version: " << __CUDA << std::endl;
 
     int runtime_ver;
     cudaRuntimeGetVersion(&runtime_ver);
