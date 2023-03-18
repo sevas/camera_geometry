@@ -199,66 +199,38 @@ vertex_data make_sphere(const int n)
 }
 
 
+std::vector<uint8_t> render_z_buffer(const int h, const int w, std::vector<float>& us, std::vector<float>& vs, std::vector<float>& zs)
+{
+    std::vector<uint8_t> img(h * w);
+    std::fill(begin(img), end(img), 255);
+    const auto N = us.size();
+
+    for (int i = 0u; i < N; ++i)
+    {
+        int u = static_cast<int>(us[i]);
+        int v = static_cast<int>(vs[i]);
+        if (u >= 0 && u < w && v >= 0 && v < h)
+        {
+            const auto value = static_cast<uint8_t>(zs[i]);
+            if (value < img[v * w + u])
+            {
+                img[v * w + u] = value;
+            }
+        }
+    }
+
+    return img;
+}
+
+
 int main()
 {
     std::cout << "Hello, world!" << std::endl;
     std::cout << "CUDA: On" << std::endl;
     printCudaVersion();
 
-    camera_intrinsics intrinsics{180, 240, 50, 50, 180.f / 2, 240.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
+    camera_intrinsics intrinsics{240, 180, 50, 50, 180.f / 2, 240.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
 
-
-    //float* out = nullptr, * x = nullptr, * y = nullptr;
-    //int N = 100000000;
-    //
-    //std::cout << "allocating on gpu" << std::endl;
-    //cudaMalloc((void**)&out, sizeof(float) * N);
-    //cudaMalloc((void**)&x, sizeof(float) * N);
-    //cudaMalloc((void**)&y, sizeof(float) * N);
-
-    //std::cout << "making sample data" << std::endl;
-    //std::vector<float> xx(N);
-    //std::vector<float> yy(N);
-
-    //std::fill(begin(xx), end(xx), 12.f);
-    //std::fill(begin(yy), end(yy), 45.f);
-
-    //std::cout << "Copying to GPU" << std::endl;
-    //cudaMemcpy(x, xx.data(), N, cudaMemcpyHostToDevice);
-    //cudaMemcpy(y, yy.data(), N, cudaMemcpyHostToDevice);
-
-    //cudaFuncAttributes attrs{ };
-    //auto cudaStatus = cudaFuncGetAttributes(&attrs, vector_add);
-    //if (cudaStatus != cudaSuccess)
-    //{
-    //    printf("cudaFuncGetAttributes call failed: %s\n", cudaGetErrorString(cudaStatus));
-    //    return 0;
-    //}
-
-
-    //auto const maxThreadCount = attrs.maxThreadsPerBlock;
-    //auto const blocksize = (N + maxThreadCount - 1) / maxThreadCount;
-
-    //std::cout << "maxThreadCount: " << maxThreadCount << std::endl;
-    //std::cout << "blocksize: " << blocksize << std::endl;
-
-    //std::cout << "RUnning kernel" << std::endl;
-    //void* args[] = {&out, &x, &y, &N};
-    //cudaLaunchKernel(vector_add, dim3(1, 1, 1), dim3(blocksize, 1, 1), args, 0U, nullptr);
-
-    ////vector_add <<<1, 1 >>> (out, x, y, N);
-
-    //cudaDeviceSynchronize();
-
-    //std::cout << "Done" << std::endl;
-
-    //cudaFree(x);
-    //cudaFree(y);
-    //cudaFree(out);
-
-
-    //int N = 100000;
-    //random_sphere_points points(N);
     vertex_data far_plane = make_plane(64, 64, 0, 0, 20, 1);
     vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
     points.concat(far_plane);
@@ -279,7 +251,7 @@ int main()
     cudaMemcpy(z.data, points.zs.data(), N, cudaMemcpyHostToDevice);
 
     cudaFuncAttributes attrs{};
-    auto cudaStatus = cudaFuncGetAttributes(&attrs, vector_add);
+    auto cudaStatus = cudaFuncGetAttributes(&attrs, project_points);
     if (cudaStatus != cudaSuccess)
     {
         printf("cudaFuncGetAttributes call failed: %s\n", cudaGetErrorString(cudaStatus));
@@ -298,54 +270,22 @@ int main()
 
     cudaDeviceSynchronize();
 
-    std::vector<float> uu(N);
-    std::vector<float> vv(N);
+    std::vector<float> u_gpu(N);
+    std::vector<float> v_gpu(N);
 
-    cudaMemcpy(uu.data(), u.data, N, cudaMemcpyDeviceToHost);
-    cudaMemcpy(vv.data(), v.data, N, cudaMemcpyDeviceToHost);
+    cudaMemcpy(u_gpu.data(), u.data, N, cudaMemcpyDeviceToHost);
+    cudaMemcpy(v_gpu.data(), v.data, N, cudaMemcpyDeviceToHost);
 
-    std::vector<uint8_t> img(static_cast<size_t>(180 * 240));
-    std::fill(begin(img), end(img), 255);
-    const int w = 240, h = 180;
-
-    for (int i = 0u; i < N; ++i)
-    {
-        int u_ = int(uu[i]);
-        int v_ = int(vv[i]);
-        if (u_ >= 0 && u_ < w && v_ >= 0 && v_ < h)
-        {
-            auto value = static_cast<uint8_t>(points.zs[i] * 255);
-            if (value < img[v_ * w + u_])
-            {
-                img[v_ * w + u_] = value;
-            }
-        }
-    }
-
+    auto img = render_z_buffer(intrinsics.h, intrinsics.w, u_gpu, v_gpu, points.zs);
 
     std::vector<float> u_cpu(N);
     std::vector<float> v_cpu(N);
 
     project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
 
-    std::vector<uint8_t> img2(180 * 240);
-    std::fill(begin(img2), end(img2), 255);
+    auto img2 = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
 
-
-    for (int i = 0u; i < N; ++i)
-    {
-        int u_ = static_cast<int>(u_cpu[i]);
-        int v_ = static_cast<int>(v_cpu[i]);
-        if (u_ >= 0 && u_ < w && v_ >= 0 && v_ < h)
-        {
-            auto value = static_cast<uint8_t>(points.zs[i]);
-            if (value < img2[v_ * w + u_])
-            {
-                img2[v_ * w + u_] = value;
-            }
-        }
-    }
-
+    
 
     return 0;
 }
