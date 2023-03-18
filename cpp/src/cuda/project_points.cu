@@ -1,18 +1,25 @@
+#include <cstdio>
+
 __global__
-void project_points(const float* X, const float* Y, const float* Z, float* u, float* v)
+void project_points(const float* X, const float* Y, const float* Z, float* u, float* v, int N)
 {
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
+    if (tid >= N)
+    {
+        return;
+    }
+    //printf("[%d]  %0.3f    %0.3f\n", tid, X[tid], Z[tid]);
     float x = X[tid] / Z[tid];
     float y = Y[tid] / Z[tid];
 
     float h = 180;
     float w = 240;
 
-    float fx = 70.0f;
-    float fy = 70.0f;
+    float fx = 50.0f;
+    float fy = 50.0f;
     float cx = w / 2;
     float cy = h / 2;
-    float k1 = 0.0;
+    float k1 = 0.01;
     float k2 = 0.2;
     float k3 = 0.0;
     float p1 = 0.0;
