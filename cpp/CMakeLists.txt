@@ -4,7 +4,7 @@ message(STATUS "CMake version: ${CMAKE_VERSION}")
 project(cg_cpp LANGUAGES CUDA CXX)
 
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  set(CMAKE_CUDA_ARCHITECTURES native)
+  set(CMAKE_CUDA_ARCHITECTURES 75)
 endif()
 
 option(USE_CUDA "Use CUDA" ON)
