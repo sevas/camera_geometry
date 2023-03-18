@@ -35,9 +35,9 @@ if(MSVC)
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${cpu_source_files} )
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${gpu_source_files} )
 
-    set(CMAKE_CXX_FLAGS "/W3")
+    set(CMAKE_CXX_FLAGS "/W3 /EHsc")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /WX /EHsc")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /WX")
 
     #target_compile_options(cg_cpp PRIVATE $<$COMPILE_LANGUAGE:CXX>:$<$<CONFIG:Debug>:/W4 /ZI> $<$<CONFIG:Release>:/WX>>)
     
