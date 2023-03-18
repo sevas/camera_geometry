@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.8)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 project(cg_cpp LANGUAGES CUDA CXX)
