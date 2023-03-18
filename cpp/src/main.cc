@@ -7,6 +7,7 @@
 #pragma warning(pop)
 
 #include "cuda/gpu.hpp"
+#include "scoped_timer.hpp"
 
 
 using std::begin;
@@ -225,31 +226,44 @@ std::vector<uint8_t> render_z_buffer(const int h, const int w, std::vector<float
 
 int main()
 {
+    using default_scoped_timer = scoped_timer_us;
+
     std::cout << "Hello, world!" << std::endl;
     std::cout << "CUDA: On" << std::endl;
     printCudaVersion();
 
-    camera_intrinsics intrinsics{240, 180, 50, 50, 180.f / 2, 240.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
+    camera_intrinsics intrinsics{240, 180, 50, 50, 240.f / 2, 180.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
 
     vertex_data far_plane = make_plane(64, 64, 0, 0, 20, 1);
     vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
+
+
+    vertex_data far_plane2 = make_plane(64000, 6400, 0, 0, 30, 1);
+
+
     points.concat(far_plane);
+    points.concat(far_plane2);
+
 
     int N = static_cast<int>(points.xs.size());
+    std::cout << "Point count: " << N << std::endl;
+
+
     const auto pointcloud = points.pack_vertices_nx3();
 
 
-    cuda_array<float> x(N);
-    cuda_array<float> y(N);
-    cuda_array<float> z(N);
-    cuda_array<float> u(N);
-    cuda_array<float> v(N);
+    cuda_array<float> cu_x(N);
+    cuda_array<float> cu_y(N);
+    cuda_array<float> cu_z(N);
+    cuda_array<float> cu_u(N);
+    cuda_array<float> cu_v(N);
 
-
-    cudaMemcpy(x.data, points.xs.data(), N, cudaMemcpyHostToDevice);
-    cudaMemcpy(y.data, points.ys.data(), N, cudaMemcpyHostToDevice);
-    cudaMemcpy(z.data, points.zs.data(), N, cudaMemcpyHostToDevice);
-
+    {
+        default_scoped_timer t("project_points_gpu::host->gpu");
+        cu_x.copy_from(points.xs);
+        cu_y.copy_from(points.ys);
+        cu_z.copy_from(points.zs);
+    }
     cudaFuncAttributes attrs{};
     auto cudaStatus = cudaFuncGetAttributes(&attrs, project_points);
     if (cudaStatus != cudaSuccess)
@@ -258,32 +272,40 @@ int main()
         return 0;
     }
 
-
     auto const maxThreadCount = attrs.maxThreadsPerBlock;
     auto const blocksize = (N + maxThreadCount - 1) / maxThreadCount;
 
     std::cout << "Running kernel" << std::endl;
-    void* args[] = {&x.data, &y.data, &z.data, &u.data, &v.data};
-    cudaLaunchKernel(project_points, dim3(maxThreadCount, 1, 1), dim3(blocksize, 1, 1), args, 0U, nullptr);
+    {
+        default_scoped_timer t("project_points_gpu::execute");
+        void* args[] = {&cu_x.data, &cu_y.data, &cu_z.data, &cu_u.data, &cu_v.data, &N};
+        cudaLaunchKernel(project_points, dim3(1, 1, 1), dim3(1, 1, 1), args, 0U, nullptr);
+        ////vector_add <<<1, 1 >>> (out, x, y, N);
+        cudaDeviceSynchronize();
+    }
 
-    ////vector_add <<<1, 1 >>> (out, x, y, N);
-
-    cudaDeviceSynchronize();
 
     std::vector<float> u_gpu(N);
     std::vector<float> v_gpu(N);
 
-    cudaMemcpy(u_gpu.data(), u.data, N, cudaMemcpyDeviceToHost);
-    cudaMemcpy(v_gpu.data(), v.data, N, cudaMemcpyDeviceToHost);
+    {
+        default_scoped_timer t("project_points_gpu::gpu->host");
+        cu_u.copy_into(u_gpu);
+        cu_v.copy_into(v_gpu);
+        
+    }
+    auto img_gpu = render_z_buffer(intrinsics.h, intrinsics.w, u_gpu, v_gpu, points.zs);
 
-    auto img = render_z_buffer(intrinsics.h, intrinsics.w, u_gpu, v_gpu, points.zs);
 
     std::vector<float> u_cpu(N);
     std::vector<float> v_cpu(N);
 
-    project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
+    {
+        default_scoped_timer t("project_points_cpu");
+        project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
+    }
 
-    auto img2 = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
+    auto img_cpu = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
 
     
 

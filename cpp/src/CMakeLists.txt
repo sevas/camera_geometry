@@ -1,5 +1,8 @@
 
-set(source_files main.cc)
+set(source_files 
+    main.cc
+    scoped_timer.hpp
+)
 
 set(gpu_source_files 
     "cuda/gpu.cu"
