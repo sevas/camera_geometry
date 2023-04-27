@@ -1,13 +1,23 @@
 cmake_minimum_required(VERSION 3.8)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
-project(cg_cpp LANGUAGES CUDA CXX)
+option(USE_CUDA "Use CUDA" OFF)
 
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  set(CMAKE_CUDA_ARCHITECTURES 75)
+set(languages CXX)
+set(CMAKE_CXX_STANDARD 17)
+
+
+if(USE_CUDA)
+  list(APPEND languages CUDA)
 endif()
 
-option(USE_CUDA "Use CUDA" ON)
+project(cg_cpp LANGUAGES ${languages} VERSION 0.1.0)
+
+if(USE_CUDA)
+   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+     set(CMAKE_CUDA_ARCHITECTURES 75)
+   endif()
+endif()
 
 add_subdirectory(src)
 

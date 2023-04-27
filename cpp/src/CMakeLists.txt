@@ -2,20 +2,29 @@
 set(source_files 
     main.cc
     scoped_timer.hpp
+    cg_scalar.h
+    cg_scalar.cpp
+        cg_types.h
+        geometry3d.h
+        geometry3d.cpp
 )
 
-set(gpu_source_files 
-    "cuda/gpu.cu"
-    "cuda/gpu.hpp"
-    "cuda/vector_add.cu"
-    "cuda/project_points.cu"
-)
+if(USE_CUDA)
+    set(gpu_source_files
+        "cuda/gpu.cu"
+        "cuda/gpu.hpp"
+        "cuda/vector_add.cu"
+        "cuda/project_points.cu"
+    )
+    enable_language("CUDA")
+endif()
 
-
-enable_language("CUDA")
 add_executable(cg_cpp ${source_files} ${gpu_source_files})
-target_compile_definitions(cg_cpp PRIVATE USE_CUDA)
 
+
+if(USE_CUDA)
+    target_compile_definitions(cg_cpp PRIVATE USE_CUDA)
+endif()
 
 
 if(MSVC)
