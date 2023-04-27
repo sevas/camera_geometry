@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 option(USE_CUDA "Use CUDA" OFF)
+option(USE_HALIDE "Use Halide" ON)
 
 set(languages CXX)
 set(CMAKE_CXX_STANDARD 17)
@@ -11,6 +12,10 @@ if(USE_CUDA)
   list(APPEND languages CUDA)
 endif()
 
+if(USE_HALIDE)
+    list(APPEND languages C)
+endif()
+
 project(cg_cpp LANGUAGES ${languages} VERSION 0.1.0)
 
 if(USE_CUDA)
@@ -18,6 +23,22 @@ if(USE_CUDA)
      set(CMAKE_CUDA_ARCHITECTURES 75)
    endif()
 endif()
+
+
+if (USE_HALIDE)
+    if (APPLE)
+        #currently only supporting homebrew on macos
+        set(Halide_DIR "/opt/homebrew/Cellar/halide/12.0.1/lib/cmake/Halide")
+        set(LLVM_DIR "/opt/homebrew/Cellar/llvm@15/15.0.7/lib/cmake/llvm")
+    endif()
+    set(CMAKE_MODULE_PATH
+            ${CMAKE_MODULE_PATH}
+            ${Halide_DIR}
+            ${LLVM_DIR})
+
+    find_package(Halide REQUIRED)
+endif()
+
 
 add_subdirectory(src)
 

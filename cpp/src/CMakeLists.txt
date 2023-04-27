@@ -26,6 +26,10 @@ if(USE_CUDA)
     target_compile_definitions(cg_cpp PRIVATE USE_CUDA)
 endif()
 
+if(USE_HALIDE)
+    target_link_libraries(cg_cpp PRIVATE Halide::Halide Halide::Tools)
+    target_compile_definitions(cg_cpp PRIVATE USE_HALIDE)
+endif()
 
 if(MSVC)
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files} )
