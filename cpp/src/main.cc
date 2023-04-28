@@ -59,17 +59,18 @@ Halide::Func blur_3x3(Halide::Func input) {
 }
 
 
-void project_points_halide(const std::vector<float> &xs,
-                           const std::vector<float> &ys,
-                           const std::vector<float> &zs,
-                           std::vector<float> &us,
-                           std::vector<float> &vs,
-                           const camera_intrinsics &intrinsics) {
+void project_points_halide(const std::vector<float>& xs,
+                           const std::vector<float>& ys,
+                           const std::vector<float>& zs,
+                           std::vector<float>& us,
+                           std::vector<float>& vs,
+                           const camera_intrinsics& intrinsics)
+{
     using namespace Halide;
     const int n = static_cast<int>(xs.size());
-    Buffer<> xs_buf(const_cast<float *>(xs.data()), n);
-    Buffer<> ys_buf(const_cast<float *>(ys.data()), n);
-    Buffer<> zs_buf(const_cast<float *>(zs.data()), n);
+    Buffer<float> xs_buf(const_cast<float*>(xs.data()), n);
+    Buffer<float> ys_buf(const_cast<float*>(ys.data()), n);
+    Buffer<float> zs_buf(const_cast<float*>(zs.data()), n);
 
     const float fx = intrinsics.fx;
     const float fy = intrinsics.fy;
@@ -98,8 +99,14 @@ void project_points_halide(const std::vector<float> &xs,
 
     Expr u = fx * xd + cx;
     Expr v = fy * yd + cy;
-    project_points(i) = {u, v};
-    Buffer<float> uv = project_points.realize({n});
+    project_points(i) = Tuple(u, v);
+    Realization r = project_points.realize({n});
+
+    Buffer<float> u_ = r[0];
+    Buffer<float> v_ = r[1];
+
+    std::copy(u_.begin(), u_.end(), us.begin());
+    std::copy(v_.begin(), v_.end(), vs.begin());
 }
 
 
