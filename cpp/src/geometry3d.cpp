@@ -3,7 +3,6 @@
 #include <random>
 
 
-
 void vertex_data::add_vertex(float x, float y, float z)
 {
     xs.push_back(x);
