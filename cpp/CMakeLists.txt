@@ -1,11 +1,21 @@
+###############################################################################
+## Prelude
+###############################################################################
 cmake_minimum_required(VERSION 3.8)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
+set(languages CXX)
+set(CMAKE_CXX_STANDARD 17)
+
+###############################################################################
+## Global Options
+###############################################################################
 option(USE_CUDA "Use CUDA" OFF)
 option(USE_HALIDE "Use Halide" ON)
 
-set(languages CXX)
-set(CMAKE_CXX_STANDARD 17)
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti" )
+endif()
 
 
 if(USE_CUDA)
@@ -25,20 +35,31 @@ if(USE_CUDA)
 endif()
 
 
+###############################################################################
+## Dependencies
+###############################################################################
 if (USE_HALIDE)
     if (APPLE)
+        #set(CMAKE_PREFIX_PATH "/usr/local/opt" ${CMAKE_PREFIX_PATH})
+        set(homebrew_modules_path "/opt/homebrew/lib/share/cmake/Modules")
         #currently only supporting homebrew on macos
-        set(Halide_DIR "/opt/homebrew/Cellar/halide/12.0.1/lib/cmake/Halide")
+        #set(Halide_DIR "/opt/homebrew/Cellar/halide/12.0.1/lib/cmake/Halide")
         set(LLVM_DIR "/opt/homebrew/Cellar/llvm@15/15.0.7/lib/cmake/llvm")
     endif()
     set(CMAKE_MODULE_PATH
             ${CMAKE_MODULE_PATH}
-            ${Halide_DIR}
-            ${LLVM_DIR})
+            ${homebrew_modules_path}
+            ${LLVM_DIR}
+            )
 
     find_package(Halide REQUIRED)
 endif()
 
+set(STB_DIR ${CMAKE_SOURCE_DIR}/deps/stb)
+
+###############################################################################
+## Targets
+###############################################################################
 
 add_subdirectory(src)
 
@@ -74,5 +95,3 @@ if(MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 endif()
-
-

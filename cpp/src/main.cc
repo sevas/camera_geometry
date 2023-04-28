@@ -21,23 +21,28 @@
 #include "geometry3d.h"
 #include "cg_types.h"
 #include "cg_scalar.h"
+#include "imageio.h"
 
 using std::begin;
 using std::end;
 
 
 std::vector<uint8_t>
-render_z_buffer(const int h, const int w, std::vector<float> &us, std::vector<float> &vs, std::vector<float> &zs) {
+render_z_buffer(const int h, const int w, std::vector<float>& us, std::vector<float>& vs, std::vector<float>& zs)
+{
     std::vector<uint8_t> img(h * w);
     std::fill(begin(img), end(img), 255);
     const auto N = us.size();
 
-    for (int i = 0u; i < N; ++i) {
+    for (int i = 0u; i < N; ++i)
+    {
         int u = static_cast<int>(us[i]);
         int v = static_cast<int>(vs[i]);
-        if (u >= 0 && u < w && v >= 0 && v < h) {
+        if (u >= 0 && u < w && v >= 0 && v < h)
+        {
             const auto value = static_cast<uint8_t>(zs[i]);
-            if (value < img[v * w + u]) {
+            if (value < img[v * w + u])
+            {
                 img[v * w + u] = value;
             }
         }
@@ -47,7 +52,8 @@ render_z_buffer(const int h, const int w, std::vector<float> &us, std::vector<fl
 }
 
 
-Halide::Func blur_3x3(Halide::Func input) {
+Halide::Func blur_3x3(Halide::Func input)
+{
     Halide::Func blur_x, blur_y;
     Halide::Var x, y, xi, yi;
 
@@ -110,7 +116,8 @@ void project_points_halide(const std::vector<float>& xs,
 }
 
 
-int main() {
+int main()
+{
     using default_scoped_timer = scoped_timer_us;
 
 #ifdef USE_CUDA
@@ -120,11 +127,11 @@ int main() {
 
     camera_intrinsics intrinsics{240, 180, 50, 50, 240.f / 2, 180.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
 
-    vertex_data far_plane = make_plane(64, 64, 0, 0, 20, 1);
+    vertex_data far_plane = make_plane(640, 640, 0, 0, 20, 1);
     vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
 
 
-    vertex_data far_plane2 = make_plane(640, 640, 0, 0, 30, 1);
+    vertex_data far_plane2 = make_plane(1000, 10000, 0, 0, 30, 1);
 
 
     points.concat(far_plane);
@@ -179,7 +186,6 @@ int main() {
         default_scoped_timer t("project_points_gpu::gpu->host");
         cu_u.copy_into(u_gpu);
         cu_v.copy_into(v_gpu);
-        
     }
     auto img_gpu = render_z_buffer(intrinsics.h, intrinsics.w, u_gpu, v_gpu, points.zs);
 #endif
@@ -195,17 +201,37 @@ int main() {
     }
 
     auto img_cpu = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
+    auto img_rgb_cpu = grayscale_to_rgb(img_cpu);
+    imwrite("img_cpu.png", intrinsics.w, intrinsics.h, img_rgb_cpu);
 
 #ifdef USE_HALIDE
     // halide impl
     std::vector<float> u_hl(N);
     std::vector<float> v_hl(N);
+
     project_points_halide(points.xs, points.ys, points.zs, u_hl, v_hl, intrinsics);
 
     {
         default_scoped_timer t("project_points_halide");
         project_points_halide(points.xs, points.ys, points.zs, u_hl, v_hl, intrinsics);
     }
+
+    auto img_hl = render_z_buffer(intrinsics.h, intrinsics.w, u_hl, v_hl, points.zs);
+    auto img_rgb_hl = grayscale_to_rgb(img_hl);
+    imwrite("img_hl.png", intrinsics.w, intrinsics.h, img_rgb_hl);
+
+
+//    for(auto i=0u; i<N; ++i)
+//    {
+//        if (std::abs(u_cpu[i] - u_hl[i]) > 1e-3f)
+//        {
+//            std::cout << "u mismatch at " << i << " " << u_cpu[i] << " " << u_hl[i] << std::endl;
+//        }
+//        if (std::abs(v_cpu[i] - v_hl[i]) > 1e-3f)
+//        {
+//            std::cout << "v mismatch at " << i << " " << v_cpu[i] << " " << v_hl[i] << std::endl;
+//        }
+//    }
 
 #endif
     return 0;

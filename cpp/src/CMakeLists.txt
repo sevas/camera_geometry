@@ -7,7 +7,7 @@ set(source_files
         cg_types.h
         geometry3d.h
         geometry3d.cpp
-)
+        imageio.h imageio.cpp)
 
 if(USE_CUDA)
     set(gpu_source_files
@@ -20,6 +20,7 @@ if(USE_CUDA)
 endif()
 
 add_executable(cg_cpp ${source_files} ${gpu_source_files})
+target_include_directories(cg_cpp PRIVATE ${STB_DIR})
 
 
 if(USE_CUDA)
@@ -30,6 +31,8 @@ if(USE_HALIDE)
     target_link_libraries(cg_cpp PRIVATE Halide::Halide Halide::Tools)
     target_compile_definitions(cg_cpp PRIVATE USE_HALIDE)
 endif()
+
+
 
 if(MSVC)
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_files} )
