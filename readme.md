@@ -9,11 +9,12 @@ Including:
 - numba
 - julia
 - rust
-
+- c++ scalar
+- cuda
+- c++ with [halide](https://github.com/halide/Halide)
 
 Coming next:
-- opencl 
-- cuda
+- opencl
 - glsl shader
 - fpga
 
