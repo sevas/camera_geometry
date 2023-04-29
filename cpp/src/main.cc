@@ -65,6 +65,42 @@ Halide::Func blur_3x3(Halide::Func input)
 }
 
 
+Halide::Target find_gpu_target()
+{
+    using namespace Halide;
+    Target target = get_host_target();
+
+    std::vector<Target::Feature> features_to_try;
+    if(target.os == Target::Windows)
+    {
+        if(sizeof(void*) == 8)
+        {
+            features_to_try.push_back(Target::D3D12Compute);
+
+        }
+        features_to_try.push_back(Target::OpenCL);
+
+    }
+    else if (target.os == Target::OSX)
+    {
+        features_to_try.push_back(Target::Metal);
+    }
+    else
+    {
+        features_to_try.push_back(Target::OpenCL);
+    }
+    for(auto feature : features_to_try)
+    {
+        Target new_target = target.with_feature(feature);
+        if(host_supports_target_device(new_target))
+        {
+            return new_target;
+        }
+    }
+    return target;
+}
+
+
 void project_points_halide(const std::vector<float>& xs,
                            const std::vector<float>& ys,
                            const std::vector<float>& zs,
@@ -106,6 +142,16 @@ void project_points_halide(const std::vector<float>& xs,
     Expr u = fx * xd + cx;
     Expr v = fy * yd + cy;
     project_points(i) = Tuple(u, v);
+
+    Target target = find_gpu_target();
+
+    std::cout << "using target : " << target.to_string() << std::endl;
+    {
+        scoped_timer<unit::us> t("compiling halide");
+        project_points.compile_jit(target);
+    }
+
+
     Realization r = project_points.realize({n});
 
     Buffer<float> u_ = r[0];
