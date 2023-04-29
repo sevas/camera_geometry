@@ -202,7 +202,7 @@ int main()
 
     auto img_cpu = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
     auto img_rgb_cpu = grayscale_to_rgb(img_cpu);
-    imwrite("img_cpu.png", intrinsics.w, intrinsics.h, img_rgb_cpu);
+    imwrite("img_cpu.png", intrinsics.w, intrinsics.h, 3, img_rgb_cpu);
 
 #ifdef USE_HALIDE
     // halide impl
@@ -218,7 +218,8 @@ int main()
 
     auto img_hl = render_z_buffer(intrinsics.h, intrinsics.w, u_hl, v_hl, points.zs);
     auto img_rgb_hl = grayscale_to_rgb(img_hl);
-    imwrite("img_hl.png", intrinsics.w, intrinsics.h, img_rgb_hl);
+    imwrite("img_hl.png", intrinsics.w, intrinsics.h, 3, img_rgb_hl);
+    imwrite("img_hl.bin", intrinsics.w, intrinsics.h, 3, img_rgb_hl);
 
 
 //    for(auto i=0u; i<N; ++i)
