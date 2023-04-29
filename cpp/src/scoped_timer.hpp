@@ -12,28 +12,12 @@ enum class unit
     ns
 };
 
-// clang-format: off
-template<unit U>
-struct unit_to_chrono_unit;
-template<>
-struct unit_to_chrono_unit<unit::ms>
-{
-    using type = std::chrono::milliseconds;
-    constexpr static char str[] = "ms";
-};
-template<>
-struct unit_to_chrono_unit<unit::us>
-{
-    using type = std::chrono::microseconds;
-    constexpr static char str[] = "us";
-};
-template<>
-struct unit_to_chrono_unit<unit::ns>
-{
-    using type = std::chrono::nanoseconds;
-    constexpr static char str[] = "ns";
-};
-// clang-format: on
+// clang-format off
+template<unit U> struct unit_to_chrono_unit;
+template<> struct unit_to_chrono_unit<unit::ms> { using type = std::chrono::milliseconds; constexpr static char str[] = "ms";};
+template<> struct unit_to_chrono_unit<unit::us> { using type = std::chrono::microseconds; constexpr static char str[] = "us";};
+template<> struct unit_to_chrono_unit<unit::ns> { using type = std::chrono::nanoseconds;  constexpr static char str[] = "ns";};
+// clang-format on
 
 
 template<unit U>
