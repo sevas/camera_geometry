@@ -13,17 +13,32 @@ enum class unit
 };
 
 // clang-format: off
-template<unit U> struct unit_to_chrono_unit;
-template<> struct unit_to_chrono_unit<unit::ms> { using type = std::chrono::milliseconds; constexpr static char str[] = "ms";};
-template<> struct unit_to_chrono_unit<unit::us> { using type = std::chrono::microseconds; constexpr static char str[] = "us";};
-template<> struct unit_to_chrono_unit<unit::ns> { using type = std::chrono::nanoseconds;  constexpr static char str[] = "ns";};
+template<unit U>
+struct unit_to_chrono_unit;
+template<>
+struct unit_to_chrono_unit<unit::ms>
+{
+    using type = std::chrono::milliseconds;
+    constexpr static char str[] = "ms";
+};
+template<>
+struct unit_to_chrono_unit<unit::us>
+{
+    using type = std::chrono::microseconds;
+    constexpr static char str[] = "us";
+};
+template<>
+struct unit_to_chrono_unit<unit::ns>
+{
+    using type = std::chrono::nanoseconds;
+    constexpr static char str[] = "ns";
+};
 // clang-format: on
 
 
 template<unit U>
 class scoped_timer
 {
-
     std::chrono::high_resolution_clock::time_point before;
     std::string name;
 
@@ -39,12 +54,8 @@ public:
 
         using chrono_unit = typename unit_to_chrono_unit<U>::type;
         const std::string unit_str = unit_to_chrono_unit<U>::str;
-        const auto elapsed =
-            std::chrono::duration_cast<chrono_unit>(after - before).count();
-        std::cout << "[" << name << "] " << elapsed << " " << unit_str << std::endl;    
-  
-
-        
+        const auto elapsed = std::chrono::duration_cast<chrono_unit>(after - before).count();
+        std::cout << "[" << name << "] " << elapsed << " " << unit_str << std::endl;
     }
 };
 

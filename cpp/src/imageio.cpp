@@ -14,7 +14,7 @@ std::string splitext(const std::string filename)
     }
     else
     {
-        return filename.substr(pos+1, filename.size());
+        return filename.substr(pos + 1, filename.size());
     }
 }
 

@@ -3,8 +3,6 @@
 #include <cuda_runtime.h>
 
 
-
-
 template<typename T>
 struct cuda_array
 {

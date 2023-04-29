@@ -1,8 +1,6 @@
 #include <vector>
 
 
-
-
 struct vertex_data
 {
     void add_vertex(float x, float y, float z);
