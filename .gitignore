@@ -20,3 +20,4 @@ _build/
 .build/
 .vs/
 /**/out/build
+build/
