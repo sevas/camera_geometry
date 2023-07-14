@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 ## Global Options
 ###############################################################################
 option(USE_CUDA "Use CUDA" OFF)
-option(USE_HALIDE "Use Halide" ON)
+option(USE_HALIDE "Use Halide" OFF)
 
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti" )

@@ -51,7 +51,7 @@ render_z_buffer(const int h, const int w, std::vector<float>& us, std::vector<fl
     return img;
 }
 
-
+#ifdef USE_HALIDE
 Halide::Func blur_3x3(Halide::Func input)
 {
     Halide::Func blur_x, blur_y;
@@ -160,6 +160,8 @@ void project_points_halide(const std::vector<float>& xs,
     std::copy(u_.begin(), u_.end(), us.begin());
     std::copy(v_.begin(), v_.end(), vs.begin());
 }
+#endif
+
 
 
 int main()
@@ -223,7 +225,7 @@ int main()
         ////vector_add <<<1, 1 >>> (out, x, y, N);
         cudaDeviceSynchronize();
     }
-
+	
 
     std::vector<float> u_gpu(N);
     std::vector<float> v_gpu(N);
@@ -237,7 +239,6 @@ int main()
 #endif
 
     // scalar impl
-
     std::vector<float> u_cpu(N);
     std::vector<float> v_cpu(N);
 
