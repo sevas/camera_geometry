@@ -9,6 +9,7 @@
 
 #ifdef USE_CUDA
 #include "cuda/gpu.hpp"
+#include "cg_cuda.h"
 #endif
 
 #ifdef USE_HALIDE
@@ -225,7 +226,7 @@ int main()
         ////vector_add <<<1, 1 >>> (out, x, y, N);
         cudaDeviceSynchronize();
     }
-	
+    
 
     std::vector<float> u_gpu(N);
     std::vector<float> v_gpu(N);
