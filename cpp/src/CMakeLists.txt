@@ -1,13 +1,15 @@
 
 set(source_files 
-    main.cc
-    scoped_timer.hpp
-    cg_scalar.h
-    cg_scalar.cpp
+        main.cc
+        scoped_timer.hpp
+        cg_scalar.h
+        cg_scalar.cpp
         cg_types.h
         geometry3d.h
         geometry3d.cpp
-        imageio.h imageio.cpp)
+        imageio.h
+        imageio.cpp
+)
 
 if(USE_CUDA)
     set(gpu_source_files
@@ -22,7 +24,11 @@ if(USE_CUDA)
 endif()
 
 add_executable(cg_cpp ${source_files} ${gpu_source_files})
-target_include_directories(cg_cpp PRIVATE ${STB_DIR})
+target_include_directories(cg_cpp PRIVATE ${STB_DIR} ${HAPPLY_DIR})
+
+add_custom_command(TARGET cg_cpp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../data/bun_zipper.ply $<TARGET_FILE_DIR:cg_cpp>/bun_zipper.ply
+)
 
 
 if(USE_CUDA)

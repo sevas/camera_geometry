@@ -23,6 +23,7 @@
 #include "cg_types.h"
 #include "cg_scalar.h"
 #include "imageio.h"
+#include "happly.h"
 
 using std::begin;
 using std::end;
@@ -176,16 +177,26 @@ int main()
 
     camera_intrinsics intrinsics{240, 180, 50, 50, 240.f / 2, 180.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
 
-    vertex_data far_plane = make_plane(640, 640, 0, 0, 20, 1);
-    vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
+    happly::PLYData plyIn("bun_zipper.ply");
+    vertex_data bunny;
+    bunny.xs = plyIn.getElement("vertex").getProperty<float>("x");
+    bunny.ys = plyIn.getElement("vertex").getProperty<float>("y");
+    bunny.zs = plyIn.getElement("vertex").getProperty<float>("z");
 
 
-    vertex_data far_plane2 = make_plane(1000, 10000, 0, 0, 30, 1);
+
+//    vertex_data far_plane = make_plane(640, 640, 0, 0, 20, 1);
+//    vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
+//
+//
+//    vertex_data far_plane2 = make_plane(1000, 10000, 0, 0, 30, 1);
 
 
-    points.concat(far_plane);
-    points.concat(far_plane2);
+//    points.concat(far_plane);
+//    points.concat(far_plane2);
 
+    vertex_data points;
+    points.concat(bunny);
 
     int N = static_cast<int>(points.xs.size());
     std::cout << "Point count: " << N << std::endl;

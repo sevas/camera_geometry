@@ -14,7 +14,7 @@ option(USE_CUDA "Use CUDA" OFF)
 option(USE_HALIDE "Use Halide" OFF)
 
 if(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti" )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti" )
 endif()
 
 
@@ -33,6 +33,9 @@ if(USE_CUDA)
      set(CMAKE_CUDA_ARCHITECTURES 75)
    endif()
 endif()
+
+
+
 
 
 ###############################################################################
@@ -56,6 +59,7 @@ if (USE_HALIDE)
 endif()
 
 set(STB_DIR ${CMAKE_SOURCE_DIR}/deps/stb)
+set(HAPPLY_DIR ${CMAKE_SOURCE_DIR}/deps/happly)
 
 ###############################################################################
 ## Targets
