@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <numbers>
 
 #pragma warning(pop)
 
@@ -196,9 +197,11 @@ int main()
     bunny.ys = plyIn.getElement("vertex").getProperty<float>("y");
     bunny.zs = plyIn.getElement("vertex").getProperty<float>("z");
 
-    rot_z(bunny, M_PI);
-    rot_y(bunny, M_PI);
-    translate(bunny, {0.03, 0.07, 0.15});
+    const float pi = static_cast<float>(std::numbers::pi);
+
+    rot_z(bunny, pi);
+    rot_y(bunny, pi);
+    translate(bunny, {0.03f, 0.07f, 0.15f});
     scale(bunny, 2.f);
 
 

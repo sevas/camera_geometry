@@ -33,6 +33,8 @@ target_include_directories(cg_cpp_app PRIVATE ${STB_DIR} ${HAPPLY_DIR})
 
 if(APPLE)
     target_compile_options(cg_cpp_app PRIVATE -frtti)
+elseif(MSVC)
+    target_compile_definitions(cg_cpp PUBLIC _CRT_SECURE_NO_WARNINGS)
 endif()
 
 add_custom_command(TARGET cg_cpp POST_BUILD

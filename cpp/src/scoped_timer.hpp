@@ -70,12 +70,12 @@ public:
         const auto after = std::chrono::high_resolution_clock::now();
 
         using chrono_unit = typename unit_to_chrono_unit<U>::type;
-        const auto elapsed = std::chrono::duration_cast<chrono_unit>(after - before).count();
+        const auto elapsed = static_cast<unsigned int>(std::chrono::duration_cast<chrono_unit>(after - before).count());
 
         const std::string unit_str = unit_to_chrono_unit<U>::str;
         all_timings[fullname].timings.emplace_back(elapsed);
 
-        if (!stacked_names.empty() > 0) {
+        if (!stacked_names.empty()) {
             stacked_names.pop_back();
         } else {
         }

@@ -4,13 +4,12 @@
 #include <cstdio>
 #include <stdexcept>
 
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #pragma warning(push, 3)
-#ifdef _MSC_VER
-#pragma warning( disable : 4996)   // disable unsafe functions warning-as-error
-#endif
 #include <stb_image_write.h>
 #pragma warning(pop)
+
 
 namespace cg::imageio {
 
@@ -96,7 +95,7 @@ std::vector<uint8_t> apply_palette(const std::vector<uint8_t>& grayscale)
     for (auto i = 0u; i < grayscale.size(); ++i) {
         const auto val = grayscale[i];
         const auto alpha = remainder(val, sizeof viridis_palette);
-        const auto idx = static_cast<size_t>(floor(val / sizeof viridis_palette));
+        const auto idx = static_cast<size_t>(floor(static_cast<float>(val) / sizeof viridis_palette));
         const auto color
             = lerp(viridis_palette[idx], viridis_palette[idx + 1], static_cast<float>(alpha));
 
