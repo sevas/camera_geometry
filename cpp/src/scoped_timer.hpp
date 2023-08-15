@@ -25,20 +25,33 @@ class scoped_timer
 {
     std::chrono::high_resolution_clock::time_point before;
     std::string name;
+    unsigned int elapsed;
+    std::atomic<bool> stopped = false;
 
 public:
     explicit scoped_timer(std::string name) :
         before(std::chrono::high_resolution_clock::now()),
-        name(std::move(name))
+        name(std::move(name)),
+        elapsed(0),
+        stopped(false)
     {}
 
-    ~scoped_timer()
-    {
+    unsigned int get(){
         const auto after = std::chrono::high_resolution_clock::now();
 
         using chrono_unit = typename unit_to_chrono_unit<U>::type;
+        elapsed = std::chrono::duration_cast<chrono_unit>(after - before).count();
+        stopped = true;
+        return elapsed;
+    }
+
+    ~scoped_timer()
+    {
+        if (! stopped)
+        {
+            get();
+        }
         const std::string unit_str = unit_to_chrono_unit<U>::str;
-        const auto elapsed = std::chrono::duration_cast<chrono_unit>(after - before).count();
         std::cout << "[" << name << "] " << elapsed << " " << unit_str << std::endl;
     }
 };

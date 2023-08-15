@@ -165,6 +165,12 @@ void project_points_halide(const std::vector<float>& xs,
 #endif
 
 
+template<typename T>
+float avg(const std::vector<T>& v){
+    const auto sum = std::accumulate(v.cbegin(), v.cend(), 0.f);
+    return sum / v.size();
+}
+
 
 int main()
 {
@@ -253,11 +259,15 @@ int main()
     // scalar impl
     std::vector<float> u_cpu(N);
     std::vector<float> v_cpu(N);
-
+    std::vector<unsigned int> times;
+    for(auto i=0u; i<1000; ++i)
     {
         default_scoped_timer t("project_points_cpu");
         project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
+        times.emplace_back(t.get());
     }
+
+    std::cout << "avg: " << avg(times) << " us (sample count=" << times.size() << ")" << std::endl;
 
     auto img_cpu = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
     auto img_rgb_cpu = grayscale_to_rgb(img_cpu);
