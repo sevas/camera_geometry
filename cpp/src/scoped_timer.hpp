@@ -91,18 +91,20 @@ public:
         }
         int col_length = 20;
         int col_count = 4;
-        auto print_line = [&]() {
+        auto print_line = [&](bool border=true) {
             for (auto i = 0; i < max_name_length; ++i) {
                 std::cout << "-";
             }
-            std::cout << "+";
+
+            std::string col_sep = border ? "+" : "|";
+            std::cout << col_sep;
 
             for (auto i = 0; i < col_count; ++i) {
                 for (auto j = 0; j < col_length; ++j) {
                     std::cout << "-";
                 }
                 if (i < col_count - 1) {
-                    std::cout << "+";
+                    std::cout << col_sep;
                 }
             }
             std::cout << "|" << std::endl;
@@ -117,11 +119,12 @@ public:
                   << "|" << std::right << std::setw(col_length) << "sample count"
                   << "|" << std::endl;
 
-        print_line();
+        print_line(false);
 
         for (auto& [name, session] : all_timings) {
+            const auto count = session.timings.size();
             const auto avg = std::accumulate(session.timings.cbegin(), session.timings.cend(), 0.f)
-                / session.timings.size();
+                / static_cast<float>(count);
             const auto min = *std::min_element(session.timings.cbegin(), session.timings.cend());
             const auto max = *std::max_element(session.timings.cbegin(), session.timings.cend());
             const auto precision = 5;
