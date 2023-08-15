@@ -5,7 +5,9 @@
 #include <stdexcept>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#pragma warning(push, 3)
 #include <stb_image_write.h>
+#pragma warning(pop)
 
 namespace cg::imageio {
 
