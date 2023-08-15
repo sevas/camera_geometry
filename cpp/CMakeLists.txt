@@ -13,10 +13,6 @@ set(CMAKE_CXX_STANDARD 17)
 option(USE_CUDA "Use CUDA" OFF)
 option(USE_HALIDE "Use Halide" OFF)
 
-if(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti" )
-endif()
-
 
 if(USE_CUDA)
   list(APPEND languages CUDA)

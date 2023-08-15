@@ -31,6 +31,10 @@ target_link_libraries(cg_cpp_app PRIVATE cg_cpp)
 target_include_directories(cg_cpp PUBLIC ${STB_DIR})
 target_include_directories(cg_cpp_app PRIVATE ${STB_DIR} ${HAPPLY_DIR})
 
+if(APPLE)
+    target_compile_options(cg_cpp_app PRIVATE -frtti)
+endif()
+
 add_custom_command(TARGET cg_cpp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../data/bun_zipper.ply $<TARGET_FILE_DIR:cg_cpp>/bun_zipper.ply
 )
