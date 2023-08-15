@@ -72,7 +72,7 @@ if(MSVC)
     # make these files visible in visual studio solution explorer
     set(config_files                     
         #conanfile.txt
-        ../_clang-format
+        _clang-format
         ../.gitignore
         ../.editorconfig
         #../.gitlab-ci.yml
