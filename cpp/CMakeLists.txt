@@ -66,6 +66,7 @@ set(HAPPLY_DIR ${CMAKE_SOURCE_DIR}/deps/happly)
 ###############################################################################
 
 add_subdirectory(src)
+add_subdirectory(tests)
 
 if(MSVC)
  

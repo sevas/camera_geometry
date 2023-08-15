@@ -1,6 +1,5 @@
 
-set(source_files 
-        main.cc
+set(source_files
         scoped_timer.hpp
         cg_scalar.h
         cg_scalar.cpp
@@ -20,12 +19,17 @@ if(USE_CUDA)
         "cuda/project_points.cu"
         "cg_cuda.h"
         "cg_cuda.cpp"
+            ../tests/main.cpp
     )
     enable_language("CUDA")
 endif()
 
-add_executable(cg_cpp ${source_files} ${gpu_source_files})
-target_include_directories(cg_cpp PRIVATE ${STB_DIR} ${HAPPLY_DIR})
+add_library(cg_cpp STATIC ${source_files} ${gpu_source_files})
+add_executable(cg_cpp_app main.cc)
+target_link_libraries(cg_cpp_app PRIVATE cg_cpp)
+
+target_include_directories(cg_cpp PUBLIC ${STB_DIR})
+target_include_directories(cg_cpp_app PRIVATE ${STB_DIR} ${HAPPLY_DIR})
 
 add_custom_command(TARGET cg_cpp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../data/bun_zipper.ply $<TARGET_FILE_DIR:cg_cpp>/bun_zipper.ply
