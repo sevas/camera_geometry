@@ -2,7 +2,8 @@
 *.pyc
 .pytest_cache
 .benchmarks
-
+dist/
+*.egg-info/
 
 # rust 
 rust/target
