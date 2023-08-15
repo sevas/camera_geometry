@@ -15,5 +15,9 @@ rustpy: rust/src/$(wildcard *.rs)
 bench:
 	python -m pytest tests/ -v --benchmark-histogram
 
-report: bench
+report-macos: bench
 	qlmanage -t -s 2028 *.svg -o .
+
+report-win: bench
+	inkscape -w 1024 *.svg -o benchmark_windows.png  # requires inkscape
+
