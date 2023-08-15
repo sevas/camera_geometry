@@ -76,3 +76,75 @@ vertex_data make_sphere(const int n)
     }
     return out;
 }
+
+void rotate(vertex_data &vertices, std::array<float, 9> rmat)
+{
+    const auto n = vertices.xs.size();
+    for (auto i = 0u; i < n; ++i)
+    {
+        const auto x = vertices.xs[i];
+        const auto y = vertices.ys[i];
+        const auto z = vertices.zs[i];
+
+        const auto xp = x * m3x3_at(rmat, 0, 0) + y * m3x3_at(rmat, 1, 0) + z * m3x3_at(rmat, 2, 0);
+        const auto yp = x * m3x3_at(rmat, 0, 1) + y * m3x3_at(rmat, 1, 1) + z * m3x3_at(rmat, 2, 1);
+        const auto zp = x * m3x3_at(rmat, 0, 2) + y * m3x3_at(rmat, 1, 2) + z * m3x3_at(rmat, 2, 2);
+
+        vertices.xs[i] = xp;
+        vertices.ys[i] = yp;
+        vertices.zs[i] = zp;
+    }
+}
+
+//! inplace rotation around Z axis
+void rot_z(vertex_data &vertices, float theta)
+{
+    std::array<float, 9> rmat = {
+        // clang-format off
+            cos(theta), -sin(theta), 0,
+            sin(theta), cos(theta), 0,
+            0,                  0,              1
+        // clang-format on
+    };
+
+    rotate(vertices, rmat);
+}
+
+//! inplace rotation around Z axis
+void rot_y(vertex_data &vertices, float theta)
+{
+    std::array<float, 9> rmat = {
+        // clang-format off
+            cos(theta), 0, -sin(theta),
+            0,                 1,               0,
+            sin(theta), 0, cos(theta),
+        // clang-format on
+    };
+
+    rotate(vertices, rmat);
+}
+
+void translate(vertex_data &vertices, const std::array<float, 3> &tvec)
+{
+    const auto n = vertices.size();
+
+    for (auto i = 0u; i < n; ++i)
+    {
+        vertices.xs[i] += tvec[0];
+        vertices.ys[i] += tvec[1];
+        vertices.zs[i] += tvec[2];
+    }
+}
+
+
+void scale(vertex_data &vertices, float scale)
+{
+    const auto n = vertices.size();
+
+    for (auto i = 0u; i < n; ++i)
+    {
+        vertices.xs[i] *= scale;
+        vertices.ys[i] *= scale;
+        vertices.zs[i] *= scale;
+    }
+}

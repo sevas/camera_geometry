@@ -1,11 +1,19 @@
 #pragma warning(push, 3)
 
-#include <iostream>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 #include <random>
+#include <vector>
 
 #pragma warning(pop)
+
+#include "cg_scalar.h"
+#include "cg_types.h"
+#include "geometry3d.h"
+#include "happly.h"
+#include "imageio.h"
+#include "scoped_timer.hpp"
 
 #ifdef USE_CUDA
 #include "cuda/gpu.hpp"
@@ -18,19 +26,12 @@
 
 #endif
 
-#include "scoped_timer.hpp"
-#include "geometry3d.h"
-#include "cg_types.h"
-#include "cg_scalar.h"
-#include "imageio.h"
-#include "happly.h"
 
 using std::begin;
 using std::end;
 
-
-std::vector<uint8_t>
-render_z_buffer(const int h, const int w, std::vector<float>& us, std::vector<float>& vs, std::vector<float>& zs)
+std::vector<uint8_t> render_z_buffer(const int h, const int w, std::vector<float> &us, std::vector<float> &vs,
+                                     std::vector<float> &zs)
 {
     std::vector<uint8_t> img(h * w);
     std::fill(begin(img), end(img), 255);
@@ -164,13 +165,11 @@ void project_points_halide(const std::vector<float>& xs,
 }
 #endif
 
-
-template<typename T>
-float avg(const std::vector<T>& v){
+template <typename T> float avg(const std::vector<T> &v)
+{
     const auto sum = std::accumulate(v.cbegin(), v.cend(), 0.f);
     return sum / v.size();
 }
-
 
 int main()
 {
@@ -181,7 +180,12 @@ int main()
     printCudaVersion();
 #endif
 
-    camera_intrinsics intrinsics{240, 180, 50, 50, 240.f / 2, 180.f / 2, 0.01f, 0.2f, 0.0f, 0.0f, 0.0f};
+    camera_intrinsics intrinsics{
+        // clang-format off
+        240, 180, 70, 70, 240.f / 2, 180.f / 2,
+        0.02f, -0.05f, 0.09f, 0.001f, 0.002f
+        // clang-format on
+    };
 
     happly::PLYData plyIn("bun_zipper.ply");
     vertex_data bunny;
@@ -189,20 +193,24 @@ int main()
     bunny.ys = plyIn.getElement("vertex").getProperty<float>("y");
     bunny.zs = plyIn.getElement("vertex").getProperty<float>("z");
 
+    rot_z(bunny, M_PI);
+    rot_y(bunny, M_PI);
+    translate(bunny, {0.03, 0.07, 0.15});
+    scale(bunny, 2.f);
 
 
-//    vertex_data far_plane = make_plane(640, 640, 0, 0, 20, 1);
-//    vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
-//
-//
-//    vertex_data far_plane2 = make_plane(1000, 10000, 0, 0, 30, 1);
+    vertex_data far_plane = make_plane(640, 640, 0, 0, 20, 1);
+    //    vertex_data points = make_plane(16, 16, 4.5f, 4.5f, 18, 1);
+    //
+    //
+    //    vertex_data far_plane2 = make_plane(1000, 10000, 0, 0, 30, 1);
 
-
-//    points.concat(far_plane);
-//    points.concat(far_plane2);
+    //    points.concat(far_plane);
+    //    points.concat(far_plane2);
 
     vertex_data points;
     points.concat(bunny);
+    //points.concat(far_plane);
 
     int N = static_cast<int>(points.xs.size());
     std::cout << "Point count: " << N << std::endl;
@@ -260,7 +268,7 @@ int main()
     std::vector<float> u_cpu(N);
     std::vector<float> v_cpu(N);
     std::vector<unsigned int> times;
-    for(auto i=0u; i<1000; ++i)
+    for (auto i = 0u; i < 1000; ++i)
     {
         default_scoped_timer t("project_points_cpu");
         project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
