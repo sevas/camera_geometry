@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <numeric>
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
