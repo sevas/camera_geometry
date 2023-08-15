@@ -8,5 +8,9 @@ std::string join(const std::vector<std::string>& stacked_names, const std::strin
     for (auto& s : stacked_names) {
         ss << s << sep;
     }
-    return ss.str();
+
+    std::string out = ss.str();
+    out.pop_back();
+
+    return out;
 }
