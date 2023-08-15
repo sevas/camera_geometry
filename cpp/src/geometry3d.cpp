@@ -1,6 +1,9 @@
 
 #include "geometry3d.h"
 #include <random>
+#include <cmath>
+
+using std::sin, std::cos;
 
 namespace cg::geometry3d {
 
