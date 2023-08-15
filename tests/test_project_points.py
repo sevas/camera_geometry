@@ -4,7 +4,7 @@ import plyfile
 import pytest
 
 from cg.math3d import rot_z, rot_y
-from cg.project_points import project_points_np, project_points_nb, project_points_cv
+from cg.project_points import project_points_np, project_points_nb, project_points_cv, project_points_nb_parfor
 
 from cg_rustpy import project_points_rs
 
@@ -60,7 +60,7 @@ def camera_params():
 
 
 @pytest.mark.parametrize(
-    "project_func", [project_points_np, project_points_cv, project_points_nb, project_points_rs]
+    "project_func", [project_points_np, project_points_cv, project_points_nb, project_points_rs, project_points_nb_parfor]
 )
 def test_benchmarkproject_points(benchmark, project_func, bunny_pcl, camera_params):
     k, dist = camera_params
