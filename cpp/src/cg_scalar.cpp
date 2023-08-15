@@ -1,16 +1,12 @@
 #include "cg_scalar.h"
 
-
-void project_points_cpu(const std::vector<float>& xs,
-                        const std::vector<float>& ys,
-                        const std::vector<float>& zs,
-                        std::vector<float>& us,
-                        std::vector<float>& vs,
-                        const camera_intrinsics& intrinsics)
+namespace cg {
+void project_points_cpu(const std::vector<float>& xs, const std::vector<float>& ys,
+    const std::vector<float>& zs, std::vector<float>& us, std::vector<float>& vs,
+    const camera_intrinsics& intrinsics)
 {
     const int n = static_cast<int>(xs.size());
-    for (int i = 0; i < n; ++i)
-    {
+    for (int i = 0; i < n; ++i) {
         const float x = xs[i] / zs[i];
         const float y = ys[i] / zs[i];
 
@@ -38,4 +34,5 @@ void project_points_cpu(const std::vector<float>& xs,
         us[i] = xd * fx + cx;
         vs[i] = yd * fy + cy;
     }
+}
 }

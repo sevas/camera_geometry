@@ -2,6 +2,7 @@
 #ifdef USE_CUDA
 #include <cuda_runtime.h>
 
+namespace cg::cuda {
 
 template<typename T>
 struct cuda_array
@@ -27,6 +28,6 @@ struct cuda_array
 
     T* data;
 };
-
+}
 
 #endif // USE_CUDA

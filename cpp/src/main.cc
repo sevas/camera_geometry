@@ -18,17 +18,20 @@
 #ifdef USE_CUDA
 #include "cuda/gpu.hpp"
 #include "cg_cuda.h"
+using namespace cg::cuda;
 #endif
 
 #ifdef USE_HALIDE
-
 #include "Halide.h"
-
 #endif
 
 
 using std::begin;
 using std::end;
+using cg::imageio::grayscale_to_rgb;
+using cg::imageio::imwrite;
+using namespace cg::geometry3d;
+using namespace cg::timings;
 
 std::vector<uint8_t> render_z_buffer(const int h, const int w, std::vector<float> &us, std::vector<float> &vs,
                                      std::vector<float> &zs)
@@ -180,7 +183,7 @@ int main()
     printCudaVersion();
 #endif
 
-    camera_intrinsics intrinsics{
+    cg::camera_intrinsics intrinsics{
         // clang-format off
         240, 180, 70, 70, 240.f / 2, 180.f / 2,
         0.02f, -0.05f, 0.09f, 0.001f, 0.002f

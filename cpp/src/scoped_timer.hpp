@@ -27,18 +27,15 @@
 #include <string>
 #include <vector>
 
-enum class unit
-{
-    ms,
-    us,
-    ns
-};
+namespace cg::timings {
+
+enum class unit { ms, us, ns };
 
 // clang-format off
 template<unit U> struct unit_to_chrono_unit;
 template<> struct unit_to_chrono_unit<unit::ms> { using type = std::chrono::milliseconds; constexpr static char str[] = "ms";};
 template<> struct unit_to_chrono_unit<unit::us> { using type = std::chrono::microseconds; constexpr static char str[] = "us";};
-template<> struct unit_to_chrono_unit<unit::ns> { using type = std::chrono::nanoseconds;  constexpr static char str[] = "ns";};
+template<> struct unit_to_chrono_unit<unit::ns> { using type = std::chrono::nanoseconds; constexpr static char str[] = "ns";};
 // clang-format on
 
 struct timing_session {
@@ -47,9 +44,7 @@ struct timing_session {
 
 std::string join(const std::vector<std::string>& stacked_names, const std::string& sep);
 
-template<unit U>
-class scoped_timer
-{
+template <unit U> class scoped_timer {
     std::chrono::high_resolution_clock::time_point before;
     std::string name;
     std::string fullname;
@@ -131,22 +126,24 @@ public:
             const auto max = *std::max_element(session.timings.cbegin(), session.timings.cend());
             const auto precision = 5;
             // clang-format off
-            std::cout << std::left << std::setw(max_name_length) << name << "|"
-                << std::right << std::setw(col_length) << std::setprecision(precision) << min << "|"
-                << std::right << std::setw(col_length) << std::setprecision(precision) << max << "|"
-                << std::right << std::setw(col_length) << std::setprecision(precision) << avg << "|"
-                << std::right << std::setw(col_length) << session.timings.size() << "|" << std::endl;
-            //clang-format on
-        }
+                std::cout << std::left << std::setw(max_name_length) << name << "|"
+                          << std::right << std::setw(col_length) << std::setprecision(precision) << min << "|"
+                          << std::right << std::setw(col_length) << std::setprecision(precision) << max << "|"
+                          << std::right << std::setw(col_length) << std::setprecision(precision) << avg << "|"
+                          << std::right << std::setw(col_length) << session.timings.size() << "|" << std::endl;
+                //clang-format on
+            }
 
-        print_line();
-    }
-};
+            print_line();
+        }
+    };
 
 typedef scoped_timer<unit::ms> scoped_timer_ms;
 typedef scoped_timer<unit::us> scoped_timer_us;
 typedef scoped_timer<unit::ns> scoped_timer_ns;
 
-template <unit U> std::map<std::string, timing_session> scoped_timer<U>::all_timings;
-template <unit U> std::vector<std::string> scoped_timer<U>::stacked_names;
-template <unit U> int scoped_timer<U>::depth = 0;
+}
+
+template<cg::timings::unit U> std::map<std::string, cg::timings::timing_session> cg::timings::scoped_timer<U>::all_timings;
+template<cg::timings::unit U> std::vector<std::string> cg::timings::scoped_timer<U>::stacked_names;
+template<cg::timings::unit U> int cg::timings::scoped_timer<U>::depth = 0;

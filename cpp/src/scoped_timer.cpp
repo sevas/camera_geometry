@@ -1,6 +1,7 @@
 #include "scoped_timer.hpp"
 #include <sstream>
 
+namespace cg::timings {
 std::string join(const std::vector<std::string>& stacked_names, const std::string& sep)
 {
     std::ostringstream ss;
@@ -13,4 +14,5 @@ std::string join(const std::vector<std::string>& stacked_names, const std::strin
     out.pop_back();
 
     return out;
+}
 }

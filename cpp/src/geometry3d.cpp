@@ -2,6 +2,7 @@
 #include "geometry3d.h"
 #include <random>
 
+namespace cg::geometry3d {
 
 void vertex_data::add_vertex(float x, float y, float z)
 {
@@ -12,8 +13,7 @@ void vertex_data::add_vertex(float x, float y, float z)
 
 void vertex_data::concat(const vertex_data& other)
 {
-    for (auto i = 0u; i < other.xs.size(); ++i)
-    {
+    for (auto i = 0u; i < other.xs.size(); ++i) {
         xs.push_back(other.xs[i]);
         ys.push_back(other.ys[i]);
         zs.push_back(other.zs[i]);
@@ -26,8 +26,7 @@ std::vector<float> vertex_data::pack_vertices_nx3() const
     const auto n = xs.size();
 
     out.resize(n * 3);
-    for (auto i = 0u; i < n; ++i)
-    {
+    for (auto i = 0u; i < n; ++i) {
         out[i * 3] = xs[i];
         out[i * 3 + 1] = ys[i];
         out[i * 3 + 2] = zs[i];
@@ -36,14 +35,11 @@ std::vector<float> vertex_data::pack_vertices_nx3() const
     return out;
 }
 
-
 vertex_data make_plane(int w, int h, float cx, float cy, float cz, int step)
 {
     vertex_data out;
-    for (size_t i = 0; i < w; i += step)
-    {
-        for (size_t j = 0; j < h; j += step)
-        {
+    for (size_t i = 0; i < w; i += step) {
+        for (size_t j = 0; j < h; j += step) {
             float x = static_cast<float>(cx) - (static_cast<float>(w) / 2) + i * step;
             float y = static_cast<float>(cy) - (static_cast<float>(h) / 2) + j * step;
 
@@ -60,8 +56,7 @@ vertex_data make_sphere(const int n)
     std::mt19937 gen(rd());
     std::normal_distribution<float> d(0, 1);
 
-    for (auto i = 0; i < n; ++i)
-    {
+    for (auto i = 0; i < n; ++i) {
         float x = d(gen);
         float y = d(gen);
         float z = d(gen);
@@ -77,11 +72,10 @@ vertex_data make_sphere(const int n)
     return out;
 }
 
-void rotate(vertex_data &vertices, std::array<float, 9> rmat)
+void rotate(vertex_data& vertices, std::array<float, 9> rmat)
 {
     const auto n = vertices.xs.size();
-    for (auto i = 0u; i < n; ++i)
-    {
+    for (auto i = 0u; i < n; ++i) {
         const auto x = vertices.xs[i];
         const auto y = vertices.ys[i];
         const auto z = vertices.zs[i];
@@ -97,13 +91,13 @@ void rotate(vertex_data &vertices, std::array<float, 9> rmat)
 }
 
 //! inplace rotation around Z axis
-void rot_z(vertex_data &vertices, float theta)
+void rot_z(vertex_data& vertices, float theta)
 {
     std::array<float, 9> rmat = {
         // clang-format off
-            cos(theta), -sin(theta), 0,
-            sin(theta), cos(theta), 0,
-            0,                  0,              1
+                cos(theta), -sin(theta), 0,
+                sin(theta), cos(theta), 0,
+                0, 0, 1
         // clang-format on
     };
 
@@ -111,40 +105,38 @@ void rot_z(vertex_data &vertices, float theta)
 }
 
 //! inplace rotation around Z axis
-void rot_y(vertex_data &vertices, float theta)
+void rot_y(vertex_data& vertices, float theta)
 {
     std::array<float, 9> rmat = {
         // clang-format off
-            cos(theta), 0, -sin(theta),
-            0,                 1,               0,
-            sin(theta), 0, cos(theta),
+                cos(theta), 0, -sin(theta),
+                0, 1, 0,
+                sin(theta), 0, cos(theta),
         // clang-format on
     };
 
     rotate(vertices, rmat);
 }
 
-void translate(vertex_data &vertices, const std::array<float, 3> &tvec)
+void translate(vertex_data& vertices, const std::array<float, 3>& tvec)
 {
     const auto n = vertices.size();
 
-    for (auto i = 0u; i < n; ++i)
-    {
+    for (auto i = 0u; i < n; ++i) {
         vertices.xs[i] += tvec[0];
         vertices.ys[i] += tvec[1];
         vertices.zs[i] += tvec[2];
     }
 }
 
-
-void scale(vertex_data &vertices, float scale)
+void scale(vertex_data& vertices, float scale)
 {
     const auto n = vertices.size();
 
-    for (auto i = 0u; i < n; ++i)
-    {
+    for (auto i = 0u; i < n; ++i) {
         vertices.xs[i] *= scale;
         vertices.ys[i] *= scale;
         vertices.zs[i] *= scale;
     }
+}
 }
