@@ -6,6 +6,9 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #pragma warning(push, 3)
+#ifdef _MSC_VER
+#pragma warning( disable : 4996)   // disable unsafe functions warning-as-error
+#endif
 #include <stb_image_write.h>
 #pragma warning(pop)
 
