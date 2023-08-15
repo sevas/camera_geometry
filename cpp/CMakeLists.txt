@@ -3,7 +3,7 @@
 ###############################################################################
 cmake_minimum_required(VERSION 3.8)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
-
+enable_testing()
 set(languages CXX)
 set(CMAKE_CXX_STANDARD 17)
 
