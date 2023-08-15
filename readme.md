@@ -1,7 +1,7 @@
 ## camera_geometry
 
-![GitHub Workflow Status (rust)](https://img.shields.io/github/actions/workflow/status/sevas/camera_geometry/rust.yml)
-![GitHub Workflow Status (c++)](https://img.shields.io/github/actions/workflow/status/sevas/camera_geometry/cmake-multi-platform.yml)
+- rust build: ![GitHub Workflow Status (rust)](https://img.shields.io/github/actions/workflow/status/sevas/camera_geometry/rust.yml)
+- c++ build: ![GitHub Workflow Status (c++)](https://img.shields.io/github/actions/workflow/status/sevas/camera_geometry/cmake-multi-platform.yml)
 
 
 Various implementations and speed comparison of 3D-to-2D camera projection.
