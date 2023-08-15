@@ -1,5 +1,7 @@
+#pragma once
 #include <cstddef>
 #include <vector>
+#include <array>
 
 namespace cg::geometry3d {
 
