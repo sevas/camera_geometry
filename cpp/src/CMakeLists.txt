@@ -9,6 +9,7 @@ set(source_files
         geometry3d.cpp
         imageio.h
         imageio.cpp
+        scoped_timer.cpp
 )
 
 if(USE_CUDA)

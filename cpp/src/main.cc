@@ -215,7 +215,6 @@ int main()
     int N = static_cast<int>(points.xs.size());
     std::cout << "Point count: " << N << std::endl;
 
-
     const auto pointcloud = points.pack_vertices_nx3();
 
 
@@ -264,22 +263,25 @@ int main()
     auto img_gpu = render_z_buffer(intrinsics.h, intrinsics.w, u_gpu, v_gpu, points.zs);
 #endif
 
-    // scalar impl
-    std::vector<float> u_cpu(N);
-    std::vector<float> v_cpu(N);
-    std::vector<unsigned int> times;
-    for (auto i = 0u; i < 1000; ++i)
     {
-        default_scoped_timer t("project_points_cpu");
-        project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
-        times.emplace_back(t.get());
+        default_scoped_timer t("cpu");
+        // scalar impl
+        std::vector<float> u_cpu(N);
+        std::vector<float> v_cpu(N);
+
+        for (auto i = 0u; i < 100; ++i) {
+            default_scoped_timer t2("project_points_cpu()");
+            project_points_cpu(points.xs, points.ys, points.zs, u_cpu, v_cpu, intrinsics);
+        }
+
+        {
+            default_scoped_timer t3("export image");
+            auto img_cpu = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
+            auto img_rgb_cpu = grayscale_to_rgb(img_cpu);
+            imwrite("img_cpu.png", intrinsics.w, intrinsics.h, 3, img_rgb_cpu);
+        }
     }
 
-    std::cout << "avg: " << avg(times) << " us (sample count=" << times.size() << ")" << std::endl;
-
-    auto img_cpu = render_z_buffer(intrinsics.h, intrinsics.w, u_cpu, v_cpu, points.zs);
-    auto img_rgb_cpu = grayscale_to_rgb(img_cpu);
-    imwrite("img_cpu.png", intrinsics.w, intrinsics.h, 3, img_rgb_cpu);
 
 #ifdef USE_HALIDE
     // halide impl
@@ -312,5 +314,8 @@ int main()
 //    }
 
 #endif
+
+    default_scoped_timer::print_timings();
+
     return 0;
 }
