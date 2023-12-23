@@ -7,6 +7,14 @@ enable_testing()
 set(languages CXX)
 set(CMAKE_CXX_STANDARD 20)
 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CLANG TRUE)
+endif()
+
+if(CLANG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
+
 ###############################################################################
 ## Global Options
 ###############################################################################
