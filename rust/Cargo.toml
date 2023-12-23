@@ -9,8 +9,8 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-pyo3 = { version = "0.18", features = ["extension-module"] }
-numpy = "0.18"
+pyo3 = { version = "0.20", features = ["extension-module"] }
+numpy = "0.20"
 
 
 [profile.release]
