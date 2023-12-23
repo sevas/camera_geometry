@@ -2,3 +2,4 @@ opencv
 numpy
 jupyter
 plyfile
+jax
