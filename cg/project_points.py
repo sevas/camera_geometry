@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit, cuda, prange
+ import jax.numpy as jnp
 
 
 def project_points_np_pinhole(points, k, dist_coeffs):
@@ -37,6 +38,33 @@ def project_points_np(points, k, dist_coeffs):
     return np.stack([u, v], axis=1)
 
 
+def project_points_jax(points, k, dist_coeffs):
+    XYZ = points.reshape(-1, 3).T
+    x = XYZ[0, :] / XYZ[2, :]
+    y = XYZ[1, :] / XYZ[2, :]
+
+    r2 = x * x + y * y
+    r4 = r2 * r2
+    r6 = r4 * r2
+    a1 = 2 * x * y
+    a2 = r2 + 2 * x * x
+    a3 = r2 + 2 * y * y
+    k1, k2, p1, p2, k3 = dist_coeffs
+
+    cdist = 1 + k1 * r2 + k2 * r4 + k3 * r6
+    xd = x * cdist + p1 * a1 + p2 * a2
+    yd = y * cdist + p1 * a3 + p2 * a1
+
+    fx = k[0, 0]
+    fy = k[1, 1]
+    cx = k[0, 2]
+    cy = k[1, 2]
+    u = xd * fx + cx
+    v = yd * fy + cy
+
+    return jnp.stack([u, v], axis=1)
+
+
 @njit
 def project_points_nb(points, k, dist_coeffs):
     XYZ = points.reshape(-1, 3).T
@@ -70,7 +98,6 @@ def project_points_nb(points, k, dist_coeffs):
     return uv
 
 
-
 @njit(parallel=True)
 def project_points_nb_parfor(points, k, dist_coeffs):
     XYZ = points.reshape(-1, 3).T
@@ -102,6 +129,7 @@ def project_points_nb_parfor(points, k, dist_coeffs):
         uv[i, 1] = yd * fy + cy
 
     return uv
+
 
 @cuda.jit
 def project_points_cu(points, k, dist_coeffs, uv):
@@ -140,4 +168,3 @@ def project_points_cv(points, k, dist_coeffs):
     )
     uv = np.squeeze(cv_projected)
     return uv
-

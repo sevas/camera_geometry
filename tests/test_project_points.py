@@ -2,9 +2,15 @@ from pathlib import Path
 import numpy as np
 import plyfile
 import pytest
-
+import jax.numpy as jnp
 from cg.math3d import rot_z, rot_y
-from cg.project_points import project_points_np, project_points_nb, project_points_cv, project_points_nb_parfor
+from cg.project_points import (
+    project_points_np,
+    project_points_nb,
+    project_points_cv,
+    project_points_nb_parfor,
+    project_points_jax,
+)
 
 from cg_rustpy import project_points_rs
 
@@ -60,10 +66,24 @@ def camera_params():
 
 
 @pytest.mark.parametrize(
-    "project_func", [project_points_np, project_points_cv, project_points_nb, project_points_rs, project_points_nb_parfor]
+    "project_func",
+    [
+        pytest.param((project_points_np, False), id="numpy"),
+        pytest.param((project_points_cv, False), id="opencv"),
+        pytest.param((project_points_nb, False), id="numba"),
+        pytest.param((project_points_rs, False), id="rust"),
+        pytest.param((project_points_nb_parfor, False), id="numba_parfor"),
+        pytest.param((project_points_jax, True), id="jax"),
+    ],
 )
 def test_benchmarkproject_points(benchmark, project_func, bunny_pcl, camera_params):
     k, dist = camera_params
+
+    project_func, jax_convert = project_func
+    if jax_convert:
+        bunny_pcl = jnp.asarray(bunny_pcl)
+        k = jnp.asarray(k)
+        dist = jnp.asarray(dist)
     _ = benchmark(project_func, bunny_pcl, k, dist)
 
 
