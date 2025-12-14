@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.0
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -46,6 +46,7 @@ def load_ply(fpath: str) -> plyfile.PlyData:
 
 
 bunny_ply = load_ply(bunny)
+bunny_ply['vertex'].data.shape
 
 # %%
 #from numba import njit
