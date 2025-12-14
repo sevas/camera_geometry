@@ -33,6 +33,10 @@ jax = ["jax"]
 [tool.black]
 line-length = 120
 
+[tool.ruff]
+line-length = 120
+
+
 [build-system]
 requires = ["setuptools", "wheel", "setuptools-rust"]
 build-backend = "setuptools.build_meta"
