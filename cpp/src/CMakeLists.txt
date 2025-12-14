@@ -11,6 +11,11 @@ set(source_files
         scoped_timer.cpp
 )
 
+set(simd_source_files
+        cg_simd.h
+        cg_simd.cpp
+)
+
 if(USE_CUDA)
     set(gpu_source_files
         "cuda/gpu.cu"
@@ -24,11 +29,12 @@ if(USE_CUDA)
     enable_language("CUDA")
 endif()
 
-add_library(cg_cpp STATIC ${source_files} ${gpu_source_files})
+add_library(cg_cpp STATIC ${source_files} ${gpu_source_files} ${simd_source_files})
 add_executable(cg_cpp_app main.cc)
 target_link_libraries(cg_cpp_app PRIVATE cg_cpp)
 
 target_include_directories(cg_cpp PUBLIC ${STB_DIR})
+target_include_directories(cg_cpp INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(cg_cpp_app PRIVATE ${STB_DIR} ${HAPPLY_DIR})
 
 if(APPLE)
@@ -38,7 +44,7 @@ elseif(MSVC)
 endif()
 
 add_custom_command(TARGET cg_cpp POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/../data/bun_zipper.ply $<TARGET_FILE_DIR:cg_cpp>/bun_zipper.ply
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/data/bun_zipper.ply $<TARGET_FILE_DIR:cg_cpp>/bun_zipper.ply
 )
 
 

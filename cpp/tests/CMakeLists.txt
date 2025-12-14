@@ -1,5 +1,5 @@
 
-set(DOCTEST_DIR ${CMAKE_SOURCE_DIR}/deps/doctest)
+set(DOCTEST_DIR ${CMAKE_SOURCE_DIR}/cpp/deps/doctest)
 
 set(suites
         scoped_timer
@@ -17,7 +17,7 @@ add_executable(tests
     main.cpp
     ${source_files})
 
-target_include_directories(tests PRIVATE ${DOCTEST_DIR} ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(tests PRIVATE ${DOCTEST_DIR})
 target_link_libraries(tests PRIVATE cg_cpp)
 
 

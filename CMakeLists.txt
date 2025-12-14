@@ -62,8 +62,8 @@ if (USE_HALIDE)
     find_package(Halide REQUIRED)
 endif()
 
-set(STB_DIR ${CMAKE_SOURCE_DIR}/deps/stb)
-set(HAPPLY_DIR ${CMAKE_SOURCE_DIR}/deps/happly)
+set(STB_DIR ${CMAKE_SOURCE_DIR}/cpp/deps/stb)
+set(HAPPLY_DIR ${CMAKE_SOURCE_DIR}/cpp/deps/happly)
 
 ###############################################################################
 ## Targets
