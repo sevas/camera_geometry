@@ -1,5 +1,45 @@
+[project]
+name = "camera_geometry"
+version = "0.0.1"
+description = "Minimal camera geometry utilities"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "sevas" }]
+license = { text = "MIT" }
+keywords = ["camera", "geometry"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+]
+
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "plyfile",
+    "jax",
+    "numba",
+    "pyqtgraph",
+    "PySide6",
+    "pyopengl",
+    "ruff",
+]
+
+
+
 [tool.black]
-line-lenght=120
+line-length = 120
 
 [build-system]
 requires = ["setuptools", "wheel", "setuptools-rust"]
+build-backend = "setuptools.build_meta"
+
+[tool.pixi.workspace]
+name = "camera_geometry"
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+camera_geometry = { path = ".", editable = true }
+
+[tool.pixi.tasks]
