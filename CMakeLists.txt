@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.20)
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 enable_testing()
 set(languages CXX)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 26)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CLANG TRUE)
@@ -69,19 +69,18 @@ set(HAPPLY_DIR ${CMAKE_SOURCE_DIR}/deps/happly)
 ## Targets
 ###############################################################################
 
-add_subdirectory(src)
-add_subdirectory(tests)
+add_subdirectory(cpp/src)
+add_subdirectory(cpp/tests)
 
 if(MSVC)
  
     # make these files visible in visual studio solution explorer
     set(config_files                     
         #conanfile.txt
-        _clang-format
-        ../.gitignore
-        ../.editorconfig
-        #../.gitlab-ci.yml
-        #readme.txt
+        cpp/_clang-format
+        .gitignore
+        .editorconfig
+        readme.md
     )
     set(cmake_config_files               
         #make/conan.cmake
@@ -89,9 +88,9 @@ if(MSVC)
     )
 
     set(script_files         
-        scripts/build_vs2019.ps1
-        scripts/build_vs2022.ps1
-        scripts/generate_vs_solution.ps1
+        cpp/scripts/build_vs2019.ps1
+        cpp/scripts/build_vs2022.ps1
+        cpp/scripts/generate_vs_solution.ps1
     )
 
     add_custom_target(config_files SOURCES ${config_files} ${cmake_config_files} ${script_files}) 
