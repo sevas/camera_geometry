@@ -9,6 +9,13 @@ from cg.proj_nb import project_points_nb_parfor, project_points_nb, project_poin
 from cg.proj_jax import project_points_jax
 from cg.proj_cv import project_points_cv
 
+try:
+    import mlx.core as mx
+    from cg.proj_mlx import project_points_mlx
+except ImportError:
+    mx = None
+    project_points_mlx = None
+
 from cg_rustpy.proj_rs import project_points_rs
 
 
@@ -63,26 +70,30 @@ def camera_params():
     return K, dist_coeffs
 
 
-@pytest.mark.parametrize(
-    "project_func",
-    [
-        pytest.param((project_points_np, False), id="numpy"),
-        pytest.param((project_points_cv, False), id="opencv"),
-        pytest.param((project_points_nb, False), id="numba"),
-        pytest.param((project_points_rs, False), id="rust"),
-        pytest.param((project_points_nb_parfor, False), id="numba_parfor"),
-        # pytest.param((project_points_cu, False), id="numba_cuda"),
-        pytest.param((project_points_jax, True), id="jax"),
-    ],
-)
+impl_under_test = [
+    pytest.param((project_points_np, None), id="numpy"),
+    pytest.param((project_points_cv, None), id="opencv"),
+    pytest.param((project_points_nb, None), id="numba"),
+    pytest.param((project_points_rs, None), id="rust"),
+    pytest.param((project_points_nb_parfor, None), id="numba_parfor"),
+    # pytest.param((project_points_cu, False), id="numba_cuda"),
+    pytest.param((project_points_jax, jnp.asarray), id="jax"),
+]
+
+if mx is not None:
+    impl_under_test.append(pytest.param((project_points_mlx, mx.array), id="mlx"))
+
+
+@pytest.mark.parametrize("project_func", impl_under_test)
 def test_benchmarkproject_points(benchmark, project_func, bunny_pcl, camera_params):
     k, dist = camera_params
 
-    project_func, jax_convert = project_func
-    if jax_convert:
-        bunny_pcl = jnp.asarray(bunny_pcl)
-        k = jnp.asarray(k)
-        dist = jnp.asarray(dist)
+    project_func, array_convert_func = project_func
+    if array_convert_func:
+        bunny_pcl = array_convert_func(bunny_pcl)
+        k = array_convert_func(k)
+        dist = array_convert_func(dist)
+
     _ = benchmark(project_func, bunny_pcl, k, dist)
 
 
@@ -92,10 +103,13 @@ def test_equivalence(bunny_pcl, camera_params):
     uv_cv = project_points_cv(bunny_pcl, k, dist)
     uv_nb = project_points_nb(bunny_pcl, k, dist)
     # uv_nbcu = project_points_cu(bunny_pcl, k, dist)
-
     uv_rs = project_points_rs(bunny_pcl, k, dist)
 
     np.testing.assert_almost_equal(uv_np, uv_cv)
     np.testing.assert_almost_equal(uv_nb, uv_cv)
     # np.testing.assert_almost_equal(uv_nbcu, uv_cv)
     np.testing.assert_almost_equal(uv_rs, uv_cv)
+
+    if mx is not None:
+        uv_mx = project_points_mlx(bunny_pcl, k, dist)
+        np.testing.assert_almost_equal(uv_mx, uv_cv, decimal=3)
