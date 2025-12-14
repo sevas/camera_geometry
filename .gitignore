@@ -22,3 +22,10 @@ _build/
 .vs/
 /**/out/build
 build/
+
+# venv
+.venv
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
