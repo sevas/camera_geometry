@@ -30,6 +30,9 @@ if(USE_CUDA)
 endif()
 
 add_library(cg_cpp STATIC ${source_files} ${gpu_source_files} ${simd_source_files})
+target_link_libraries(cg_cpp PRIVATE hwy)
+
+
 add_executable(cg_cpp_app main.cc)
 target_link_libraries(cg_cpp_app PRIVATE cg_cpp)
 
@@ -64,7 +67,7 @@ if(MSVC)
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${gpu_source_files} )
 
     set(CMAKE_CXX_FLAGS "/W3 /EHsc")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /ZI")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /WX")
 
 endif()

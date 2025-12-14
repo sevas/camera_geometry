@@ -65,6 +65,9 @@ endif()
 set(STB_DIR ${CMAKE_SOURCE_DIR}/cpp/deps/stb)
 set(HAPPLY_DIR ${CMAKE_SOURCE_DIR}/cpp/deps/happly)
 
+include(cpp/cmake/configure_highway.cmake)
+
+
 ###############################################################################
 ## Targets
 ###############################################################################
