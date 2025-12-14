@@ -9,7 +9,7 @@ from cg.proj_nb import project_points_nb_parfor, project_points_nb, project_poin
 from cg.proj_jax import project_points_jax
 from cg.proj_cv import project_points_cv
 
-from cg_rustpy.cg_rustpy import  project_points_rs
+from cg_rustpy.proj_rs import project_points_rs
 
 
 DATA_DIR = Path(__file__).parent.parent / "data"

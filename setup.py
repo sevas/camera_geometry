@@ -7,7 +7,7 @@ setup(
     packages=["cg"],
     rust_extensions=[
         RustExtension(
-            "cg_rustpy.cg_rustpy", binding=Binding.PyO3, path="rust/Cargo.toml"
+            "cg_rustpy._cg_rustpy", binding=Binding.PyO3, path="rust/Cargo.toml"
         )
     ],
     # rust extensions are not zip safe, just like C-extensions.

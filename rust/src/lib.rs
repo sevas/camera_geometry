@@ -1,4 +1,4 @@
-#[pyo3::pymodule]
+#[pyo3::pymodule(name = "_cg_rustpy")]
 mod cg_rustpy {
     use numpy::ndarray::{
         Array, Array2, ArrayView1, ArrayView2
