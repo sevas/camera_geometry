@@ -1,5 +1,4 @@
 import mlx.core as mx
-import mlx
 
 
 def project_points_mlx(points, k, dist_coeffs):
