@@ -1,17 +1,12 @@
-use numpy::ndarray::{
-    Array, Array2, ArrayView1, ArrayView2,
-};
-use numpy::{
-    IntoPyArray, PyArray2, PyReadonlyArray1, PyReadonlyArray2
-};
-use pyo3::{
-    pymodule,
-    types::{PyModule},
-    PyResult, Python,
-};
-
-#[pymodule]
-fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+#[pyo3::pymodule]
+mod cg_rustpy {
+    use numpy::ndarray::{
+        Array, Array2, ArrayView1, ArrayView2
+    };
+    use numpy::{
+        IntoPyArray, PyArray2, PyReadonlyArray1, PyReadonlyArray2
+    };
+    use pyo3::{Bound, Python, pyfunction};
 
     fn project_points(
         points: ArrayView2<'_, f64>,
@@ -21,7 +16,6 @@ fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         let n = points.shape()[0];
         let uv_shape = (n, 2);
         let mut uv: Array2<f64> = Array::zeros(uv_shape);
-
 
         let fx = k[(0, 0)];
         let fy = k[(1, 1)];
@@ -60,14 +54,13 @@ fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     }
 
     // wrapper of `project_points`
-    #[pyfn(m)]
-    #[pyo3(name = "project_points_rs")]
+    #[pyfunction(name = "project_points_rs")]
     fn project_points_py<'py>(
         py: Python<'py>,
         points: PyReadonlyArray2<'_, f64>,
         k: PyReadonlyArray2<'_, f64>,
         dist: PyReadonlyArray1<'_, f64>,
-    ) -> &'py PyArray2<f64> {
+    ) -> Bound<'py, PyArray2<f64>> {
         let points = points.as_array();
         let dist = dist.as_array();
         let k = k.as_array();
@@ -75,6 +68,4 @@ fn cg_rustpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         let uv = project_points(points, k, dist);
         uv.into_pyarray(py)
     }
-
-    Ok(())
 }

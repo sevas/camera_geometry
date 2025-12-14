@@ -1,7 +1,7 @@
 [package]
 name = "cg_rustpy"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [lib]
 name = "cg_rustpy"
@@ -9,8 +9,8 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-pyo3 = { version = "0.20", features = ["extension-module"] }
-numpy = "0.20"
+pyo3 = { version = "0.27" }
+numpy = "0.27"
 
 
 [profile.release]
