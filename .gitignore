@@ -8,7 +8,7 @@ dist/
 # rust 
 rust/target
 Cargo.lock
-
+cg_rustpy/*.pyd
 
 # IDEs etc
 .idea/
