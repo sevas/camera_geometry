@@ -28,13 +28,14 @@ if ("" -eq $VsVersion)
 }
 
 $generators = @{
+    vs2026 = "Visual Studio 18 2026";
     vs2022 = "Visual Studio 17 2022";
     vs2019 = "Visual Studio 16 2019";
 }
 
 
 
-$sourceDir = "$PSScriptRoot/.."
+$sourceDir = "$PSScriptRoot/../.."
 $buildRoot = "$sourceDir/.build"
 
 $pythonVersion = (python -c "from distutils import sysconfig; print(sysconfig.get_config_var('VERSION'))").trim()
