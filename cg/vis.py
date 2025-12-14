@@ -83,8 +83,8 @@ def main():
     view.addItem(g)
 
     cam_int = CameraIntrinsics(
-        fx=500 ,
-        fy=500 ,
+        fx=1000,
+        fy=1000,
         cx=320,
         cy=240,
         width=640,
@@ -131,10 +131,10 @@ def main():
 
     vertices = np.array(
         [
-            [-pw, -ph, -1],
-            [pw, -ph, -1],
-            [pw, ph, -1],
-            [-pw, ph, -1],
+            [-pw, -ph, -cam_int.fx],
+            [pw, -ph, -cam_int.fx],
+            [pw, ph, -cam_int.fx],
+            [-pw, ph, -cam_int.fx],
         ]
     )
     faces = np.array([[0, 1, 2], [0, 2, 3]])
@@ -152,7 +152,6 @@ def main():
 
 
     def make_plane_points(size, num, pos) -> np.ndarray:
-        ...
         xs = np.linspace(-size, size, num=num)
         ys = np.linspace(-size, size, num=num)
         px, py = np.meshgrid(xs, ys)
@@ -177,9 +176,9 @@ def main():
 
     def project_ph(cam_int: CameraIntrinsics, points: np.ndarray) -> np.ndarray:
         uvw = np.zeros((points.shape[0], 3))
-        uvw[:, 0] = -(cam_int.fx * points[:, 0]) / points[:, 2]
-        uvw[:, 1] = -(cam_int.fy * points[:, 1]) / points[:, 2]
-        uvw[:, 2] = -0 # points[:, 2]
+        uvw[:, 0] = -cam_int.fx * ((points[:, 0] - 0) / points[:, 2])
+        uvw[:, 1] = -cam_int.fy * ((points[:, 1] - 0) / points[:, 2])
+        uvw[:, 2] = -cam_int.fx # points[:, 2]
         return uvw[:, :3]
 
     for i, p in enumerate(planes[:]):
@@ -196,8 +195,10 @@ def main():
         ray_pos[0::2] = p
         ray_pos[1::2] = obj_2dpos
         # # Create line plot
+        lc = list(obj_colors[i])
+        lc[3] = 0.3
         line_plot = gl.GLLinePlotItem(
-             pos=ray_pos[::, :], color=obj_colors[i], width=1, antialias=True, mode='lines'
+             pos=ray_pos[::, :], color=lc , width=1, antialias=True, mode='lines'
         )
         view.addItem(line_plot)
 
