@@ -4,15 +4,12 @@ import plyfile
 import pytest
 import jax.numpy as jnp
 from cg.math3d import rot_z, rot_y
-from cg.project_points import (
-    project_points_np,
-    project_points_nb,
-    project_points_cv,
-    project_points_nb_parfor,
-    project_points_jax,
-)
+from cg.proj_np import project_points_np
+from cg.proj_nb import project_points_nb_parfor, project_points_nb, project_points_cu
+from cg.proj_jax import project_points_jax
+from cg.proj_cv import project_points_cv
 
-from cg_rustpy import project_points_rs
+from cg_rustpy.cg_rustpy import  project_points_rs
 
 
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -47,6 +44,7 @@ def bunny_pcl():
     bunny_pcl_r[:, 1] += 0.07
     bunny_pcl_r[:, 2] += 0.15
 
+    print("Bunny pcl shape:", bunny_pcl_r.shape)
     return bunny_pcl_r
 
 
@@ -73,6 +71,7 @@ def camera_params():
         pytest.param((project_points_nb, False), id="numba"),
         pytest.param((project_points_rs, False), id="rust"),
         pytest.param((project_points_nb_parfor, False), id="numba_parfor"),
+        # pytest.param((project_points_cu, False), id="numba_cuda"),
         pytest.param((project_points_jax, True), id="jax"),
     ],
 )
@@ -92,8 +91,11 @@ def test_equivalence(bunny_pcl, camera_params):
     uv_np = project_points_np(bunny_pcl, k, dist)
     uv_cv = project_points_cv(bunny_pcl, k, dist)
     uv_nb = project_points_nb(bunny_pcl, k, dist)
+    # uv_nbcu = project_points_cu(bunny_pcl, k, dist)
+
     uv_rs = project_points_rs(bunny_pcl, k, dist)
 
     np.testing.assert_almost_equal(uv_np, uv_cv)
     np.testing.assert_almost_equal(uv_nb, uv_cv)
+    # np.testing.assert_almost_equal(uv_nbcu, uv_cv)
     np.testing.assert_almost_equal(uv_rs, uv_cv)
