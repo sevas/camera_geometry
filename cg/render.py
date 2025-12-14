@@ -3,7 +3,9 @@ from typing import Tuple
 import numpy as np
 
 
-def make_img(img_shape: Tuple[int, int], u: np.ndarray, v: np.ndarray, pcl: np.ndarray) -> np.ndarray:
+def make_img(
+    img_shape: Tuple[int, int], u: np.ndarray, v: np.ndarray, pcl: np.ndarray
+) -> np.ndarray:
     h, w = img_shape
     im = np.ones(shape=img_shape) * 2
     uu = np.round(u).astype(int)
@@ -18,7 +20,9 @@ def make_img(img_shape: Tuple[int, int], u: np.ndarray, v: np.ndarray, pcl: np.n
 
 
 # @njit
-def make_img_zbuf(img_shape, u: np.ndarray, v: np.ndarray, pcl: np.ndarray) -> np.ndarray:
+def make_img_zbuf(
+    img_shape, u: np.ndarray, v: np.ndarray, pcl: np.ndarray
+) -> np.ndarray:
     h, w = img_shape
     im = np.ones(shape=img_shape) * 2
     uu = np.round(u).astype(int)

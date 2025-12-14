@@ -17,15 +17,14 @@ dependencies = [
     "numpy",
     "opencv-python",
     "plyfile",
-    "jax",
     "numba",
-    "pyqtgraph",
-    "PySide6",
-    "pyopengl",
-    "ruff",
-]
+ ]
 
-
+[project.optional-dependencies]
+mlx = ["mlx"]
+dev = ["ruff", "pytest", "jupyterlab"]
+vis = ["pyqtgraph", "pyside6", "pyopengl"]
+jax = ["jax"]
 
 [tool.black]
 line-length = 120

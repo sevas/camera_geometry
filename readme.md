@@ -66,3 +66,19 @@ test_benchmarkproject_points[project_points_cv]            15,761.0000 (54.94)  
 
 ## License
 The code in this repository is published under the MIT license.
+
+
+## Setting up dev env for python
+
+### MacOS
+
+```shell
+uv sync --extra dev --extra vis --extra jax --extra mlx
+```
+
+### Windows
+
+
+```shell
+uv sync --extra dev --extra vis --extra jax 
+```
