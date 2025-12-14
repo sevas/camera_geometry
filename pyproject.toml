@@ -21,9 +21,10 @@ dependencies = [
     "numba",
  ]
 
+
 [project.optional-dependencies]
 mlx = ["mlx"]
-dev = ["ruff", "pytest", "jupyterlab"]
+dev = ["ruff", "pytest", "pytest-benchmark", "jupyterlab"]
 vis = ["pyqtgraph", "pyside6", "pyopengl"]
 jax = ["jax"]
 
@@ -37,9 +38,30 @@ build-backend = "setuptools.build_meta"
 [tool.pixi.workspace]
 name = "camera_geometry"
 channels = ["conda-forge"]
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "linux-64", "win-64"]
+
+[tool.pixi.dependencies]
+numpy = "*"
+py-opencv = "*"
+plyfile = "*"
+numba = "*"
+pytest = "*"
+pytest-benchmark = "*"
+ruff = "*"
+pyqtgraph = "*"
+pyside6 = "*"
+pyopengl = "*"
+
 
 [tool.pixi.pypi-dependencies]
 camera_geometry = { path = ".", editable = true }
+jax = "*"
+
 
 [tool.pixi.tasks]
+tests = "python -m pytest -v tests"
+
+
+#[tool.pixi.environments.osx.dependencies]
+#mlx = "*"
+
